@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عن النظام - نظام إدارة الطباب</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'arabic': ['Cairo', 'sans-serif']
+                    },
+                    colors: {
+                        'primary': '#1e40af',
+                        'secondary': '#3b82f6',
+                        'accent': '#60a5fa',
+                        'success': '#10b981',
+                        'warning': '#f59e0b',
+                        'danger': '#ef4444'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-arabic">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-primary">🏥 نظام إدارة الطباب</h1>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4 space-x-reverse">
+                        <a href="index.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">الرئيسية</a>
+                        <a href="admin.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">الإدارة</a>
+                        <a href="display.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">العرض</a>
+                        <a href="control.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">التحكم</a>
+                        <a href="client.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">العميل</a>
+                        <a href="about.html" class="text-primary hover:text-secondary px-3 py-2 rounded-md text-sm font-medium transition-colors">عن النظام</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-bold mb-6">عن نظام إدارة الطباب الذكي</h1>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">حلول متكاملة لتنظيم الطوابير وتحسين تجربة المرضى في المراكز الطبية</p>
+        </div>
+    </section>
+
+    <!-- System Information -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">معلومات النظام</h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-tag text-primary text-xl ml-3"></i>
+                            <div>
+                                <div class="font-semibold">الإصدار</div>
+                                <div class="text-gray-600">نظام إدارة الطباب الذكي v2.1.0</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar text-primary text-xl ml-3"></i>
+                            <div>
+                                <div class="font-semibold">تاريخ الإصدار</div>
+                                <div class="text-gray-600">6 ديسمبر 2025</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-code text-primary text-xl ml-3"></i>
+                            <div>
+                                <div class="font-semibold">التقنيات المستخدمة</div>
+                                <div class="text-gray-600">Next.js 14, TypeScript, Tailwind CSS, Supabase</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-language text-primary text-xl ml-3"></i>
+                            <div>
+                                <div class="font-semibold">اللغات المدعومة</div>
+                                <div class="text-gray-600">العربية (RTL) - English (LTR)</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-database text-primary text-xl ml-3"></i>
+                            <div>
+                                <div class="font-semibold">قاعدة البيانات</div>
+                                <div class="text-gray-600">PostgreSQL مع Supabase</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="bg-gradient-to-br from-primary to-secondary text-white p-8 rounded-lg">
+                        <i class="fas fa-hospital text-6xl mb-4"></i>
+                        <h3 class="text-2xl font-bold mb-4">نظام متكامل</h3>
+                        <p class="text-lg">لإدارة الطوابير والمواعيد والأطباء والمرضى بكفاءة عالية</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Overview -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">الوظائف الرئيسية</h2>
+                <p class="text-lg text-gray-600">نظام متكامل يغطي جميع احتياجات إدارة المركز الطبي</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">شاشات العرض</h3>
+                    <p class="text-gray-600 mb-4">عرض الطوابير على شاشات متعددة مع دعم الفيديو والإعلانات</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• دعم حتى 10 شاشات</li>
+                        <li>• عرض فيديوهات توعية</li>
+                        <li>• شريط إخباري متحرك</li>
+                        <li>• QR Code للمتابعة</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">لوحات التحكم</h3>
+                    <p class="text-gray-600 mb-4">تحكم كامل في العيادات مع إمكانية النداء والتحويل</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• واجهة سهلة الاستخدام</li>
+                        <li>• دعم لوحة المفاتيح</li>
+                        <li>• تنبيهات الطوارئ</li>
+                        <li>• إحصائيات لحظية</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">متابعة العميل</h3>
+                    <p class="text-gray-600 mb-4">متابعة الدور من الهاتف دون الحاجة للانتظار أمام الشاشة</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• QR Code للدخول السريع</li>
+                        <li>• تنبيهات فورية</li>
+                        <li>• تقدير وقت الانتظار</li>
+                        <li>• شكاوى واقتراحات</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">إدارة الأطباء</h3>
+                    <p class="text-gray-600 mb-4">نظام متكامل لإدارة الأطباء وحضورهم وطلباتهم</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• سجل الحضور والانصراف</li>
+                        <li>• نظام الإجازات</li>
+                        <li>• طلبات الموظفين</li>
+                        <li>• تقارير الأداء</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">حجز المواعيد</h3>
+                    <p class="text-gray-600 mb-4">نظام حجز مواعيد إلكتروني مع إدارة الشفتات</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• حجز أونلاين</li>
+                        <li>• إدارة الشفتات</li>
+                        <li>• تأكيدات SMS/Email</li>
+                        <li>• قوائم الانتظار</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">الاستشارات</h3>
+                    <p class="text-gray-600 mb-4">نظام استشارات طبية عن بُعد مع حفظ السجلات</p>
+                    <ul class="text-sm text-gray-500 space-y-1">
+                        <li>• تسجيل المرضى</li>
+                        <li>• ملف طبي إلكتروني</li>
+                        <li>• ردود الأطباء</li>
+                        <li>• أرشفة الاستشارات</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Specifications -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">المواصفات التقنية</h2>
+                <p class="text-lg text-gray-600">تقنيات حديثة لضمان الأداء والأمان</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4">المتطلبات الفنية</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">المتصفحات المدعومة</span>
+                            <span class="font-medium">Chrome 90+, Firefox 88+, Safari 14+</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">الإتصال بالإنترنت</span>
+                            <span class="font-medium">مطلوب للمزامنة الفورية</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">دقة الشاشة المطلوبة</span>
+                            <span class="font-medium">1024x768 كحد أدنى</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">الذاكرة العشوائية</span>
+                            <span class="font-medium">4GB كحد أدنى</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4">ميزات الأمان</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <i class="fas fa-shield-alt text-success ml-2"></i>
+                            <span>تشفير SSL/TLS لجميع الاتصالات</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-key text-success ml-2"></i>
+                            <span>نظام مصادقة متقدم مع تشفير كلمات المرور</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-database text-success ml-2"></i>
+                            <span>نسخ احتياطية تلقائية للبيانات</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-user-shield text-success ml-2"></i>
+                            <span>نظام صلاحيات مفصل حسب الأدوار</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-eye-slash text-success ml-2"></i>
+                            <span>حماية خصوصية المرضى وفق المعايير الطبية</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Information -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">الدعم الفني</h2>
+                <p class="text-lg text-gray-600">نحن هنا لمساعدتك في أي وقت</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">الهاتف</h3>
+                    <p class="text-gray-600 mb-4">+966 12 345 6789</p>
+                    <p class="text-sm text-gray-500">24/7 دعم فني</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">البريد الإلكتروني</h3>
+                    <p class="text-gray-600 mb-4">support@medicalqms.com</p>
+                    <p class="text-sm text-gray-500">رد خلال 24 ساعة</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold mb-2">الدردشة المباشرة</h3>
+                    <p class="text-gray-600 mb-4">Live Chat</p>
+                    <p class="text-sm text-gray-500">من 8 ص إلى 10 م</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h3 class="text-2xl font-bold mb-4">نظام إدارة الطباب الذكي</h3>
+                <p class="text-gray-400 mb-6">حلول متكاملة لإدارة الطوابير في المراكز الطبية</p>
+                <div class="flex justify-center space-x-6 space-x-reverse mb-6">
+                    <span class="text-gray-400">© 2025 جميع الحقوق محفوظة</span>
+                </div>
+                <div class="text-sm text-gray-500">
+                    تم التطوير بواسطة فريق تقنية المعلومات - المركز الطبي الحديث
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

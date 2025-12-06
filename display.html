@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شاشة العرض - نظام إدارة الطباب</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'arabic': ['Cairo', 'sans-serif']
+                    },
+                    colors: {
+                        'primary': '#1e40af',
+                        'secondary': '#3b82f6',
+                        'accent': '#60a5fa',
+                        'success': '#10b981',
+                        'warning': '#f59e0b',
+                        'danger': '#ef4444'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+        .ticker {
+            animation: scroll-left 60s linear infinite;
+        }
+        @keyframes scroll-left {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+        }
+        .clinic-card {
+            transition: all 0.3s ease;
+        }
+        .clinic-card.active {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+        }
+        .clinic-card.paused {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+            opacity: 0.7;
+        }
+        .notification {
+            animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="font-arabic">
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">تسجيل الدخول - شاشة العرض</h2>
+                <p class="text-gray-600">أدخل كلمة السر للوصول إلى شاشة العرض</p>
+            </div>
+            <form id="display-login-form">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">رقم الشاشة</label>
+                    <select id="screen-number" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary" required>
+                        <option value="">اختر رقم الشاشة</option>
+                        <option value="1">الشاشة 1</option>
+                        <option value="2">الشاشة 2</option>
+                        <option value="3">الشاشة 3</option>
+                        <option value="4">الشاشة 4</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">كلمة السر</label>
+                    <input type="password" id="screen-password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary" required>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary transition-colors">
+                    تسجيل الدخول
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Display -->
+    <div id="main-display" class="hidden h-screen flex flex-col">
+        <!-- Header -->
+        <div class="bg-white shadow-lg px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-4 space-x-reverse">
+                <h1 id="center-name" class="text-2xl font-bold text-primary">المركز الطبي الحديث</h1>
+                <div class="text-sm text-gray-600">
+                    <i class="fas fa-desktop ml-2"></i>
+                    الشاشة <span id="current-screen">1</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4 space-x-reverse">
+                <div class="text-lg font-semibold text-gray-800">
+                    <span id="current-time"></span>
+                </div>
+                <div class="flex space-x-2 space-x-reverse">
+                    <button onclick="toggleFullscreen()" class="bg-primary text-white px-3 py-2 rounded-lg hover:bg-secondary transition-colors">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button onclick="zoomIn()" class="bg-success text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button onclick="zoomOut()" class="bg-warning text-white px-3 py-2 rounded-lg hover:bg-yellow-600 transition-colors">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button onclick="logout()" class="bg-danger text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Area -->
+        <div id="notification-area" class="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4">
+            <!-- Notifications will be inserted here -->
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex overflow-hidden">
+            <!-- Video Player (Left Side) -->
+            <div class="w-1/3 bg-black relative">
+                <div class="video-container">
+                    <video id="education-video" autoplay muted loop>
+                        <source src="education.mp4" type="video/mp4">
+                        متصفحك لا يدعم تشغيل الفيديو
+                    </video>
+                    <div class="absolute bottom-4 left-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded">
+                        <div class="text-sm">فيديوهات توعية صحية</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clinic Cards (Center) -->
+            <div class="flex-1 p-6 bg-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full" id="clinics-container">
+                    <!-- Clinic cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="w-1/4 bg-white p-4 flex flex-col space-y-4">
+                <!-- QR Code -->
+                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                    <h3 class="text-lg font-semibold mb-2">متابعة عبر الهاتف</h3>
+                    <div class="bg-white p-4 rounded-lg border-2 border-dashed border-gray-300">
+                        <div class="w-32 h-32 bg-gray-200 mx-auto flex items-center justify-center">
+                            <i class="fas fa-qrcode text-6xl text-gray-400"></i>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">امسح QR Code لمتابعة دورك</p>
+                    </div>
+                </div>
+
+                <!-- Doctor Images Carousel -->
+                <div class="bg-gray-50 p-4 rounded-lg flex-1">
+                    <h3 class="text-lg font-semibold mb-2">أطباؤنا</h3>
+                    <div id="doctor-carousel" class="h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user-md text-6xl text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ticker -->
+        <div class="bg-primary text-white py-3 overflow-hidden">
+            <div class="ticker whitespace-nowrap text-lg font-semibold" id="ticker-content">
+                مرحباً بكم في المركز الطبي الحديث - نسعى لتقديم أفضل خدمة طبية - الرجاء الانتظار بصبر - شكراً لتفهمكم
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        let currentScreen = 1;
+        let zoomLevel = 1;
+        let isFullscreen = false;
+        
+        // Sample clinic data with screen assignments
+        let clinics = [
+            { id: 1, name: 'عيادة طب الأسرة', number: 1, current: 15, status: 'active', screen: 1, lastCall: '08:30' },
+            { id: 2, name: 'عيادة الباطنية', number: 2, current: 22, status: 'active', screen: 1, lastCall: '08:45' },
+            { id: 3, name: 'عيادة الأطفال', number: 3, current: 8, status: 'paused', screen: 2, lastCall: '08:15' },
+            { id: 4, name: 'عيادة النساء', number: 4, current: 31, status: 'active', screen: 1, lastCall: '08:50' },
+            { id: 5, name: 'عيادة الأسنان', number: 5, current: 12, status: 'active', screen: 3, lastCall: '08:25' },
+            { id: 6, name: 'عيادة الجلدية', number: 6, current: 5, status: 'active', screen: 1, lastCall: '08:40' }
+        ];
+
+        // Doctor images for carousel
+        const doctorImages = [
+            'doctor1.jpg',
+            'doctor2.jpg',
+            'doctor3.jpg',
+            'doctor4.jpg'
+        ];
+
+        // Authentication
+        document.getElementById('display-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const screenNumber = document.getElementById('screen-number').value;
+            const password = document.getElementById('screen-password').value;
+            
+            // Simple authentication (in real app, this would be server-side)
+            if (password === 'display123') {
+                currentScreen = parseInt(screenNumber);
+                document.getElementById('current-screen').textContent = currentScreen;
+                document.getElementById('login-modal').style.display = 'none';
+                document.getElementById('main-display').classList.remove('hidden');
+                initializeDisplay();
+            } else {
+                alert('كلمة السر غير صحيحة');
+            }
+        });
+
+        function initializeDisplay() {
+            updateTime();
+            populateClinics();
+            startDoctorCarousel();
+            startTicker();
+            
+            // Simulate real-time updates
+            setInterval(updateTime, 1000);
+            setInterval(simulateQueueUpdates, 5000);
+            setInterval(showRandomNotification, 15000);
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ar-EG', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const dateString = now.toLocaleDateString('ar-EG');
+            document.getElementById('current-time').textContent = `${dateString} ${timeString}`;
+        }
+
+        function populateClinics() {
+            const container = document.getElementById('clinics-container');
+            container.innerHTML = '';
+            
+            // Filter clinics for current screen
+            const screenClinics = clinics.filter(clinic => clinic.screen === currentScreen);
+            
+            screenClinics.forEach(clinic => {
+                const card = document.createElement('div');
+                card.className = `clinic-card ${clinic.status} p-6 rounded-lg shadow-lg cursor-pointer`;
+                
+                card.innerHTML = `
+                    <div class="text-center">
+                        <div class="text-sm opacity-90 mb-2">${clinic.name}</div>
+                        <div class="text-6xl font-bold mb-2">${clinic.current}</div>
+                        <div class="text-sm opacity-90 mb-2">الرقم الحالي</div>
+                        <div class="flex justify-between items-center text-xs opacity-75">
+                            <span>آخر نداء: ${clinic.lastCall}</span>
+                            <span class="pulse-glow px-2 py-1 rounded">${clinic.status === 'active' ? 'نشطة' : 'متوقفة'}</span>
+                        </div>
+                    </div>
+                `;
+                
+                // Add click handler for announcements
+                card.addEventListener('click', () => {
+                    showNotification(`الآن الدور رقم ${clinic.current} في ${clinic.name}`);
+                    playAnnouncement(clinic.current, clinic.name);
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        function startDoctorCarousel() {
+            let currentImage = 0;
+            const carousel = document.getElementById('doctor-carousel');
+            
+            setInterval(() => {
+                carousel.innerHTML = `
+                    <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <i class="fas fa-user-md text-4xl mb-2"></i>
+                            <div class="text-sm">د. ${['أحمد', 'فاطمة', 'خالد', 'ليلى'][currentImage]}</div>
+                            <div class="text-xs opacity-75">${['طب أسرة', 'باطنية', 'أطفال', 'نساء'][currentImage]}</div>
+                        </div>
+                    </div>
+                `;
+                currentImage = (currentImage + 1) % 4;
+            }, 5000);
+        }
+
+        function startTicker() {
+            const ticker = document.getElementById('ticker-content');
+            const settings = JSON.parse(localStorage.getItem('generalSettings'));
+            if (settings && settings.tickerContent) {
+                ticker.textContent = settings.tickerContent;
+            }
+        }
+
+        function showNotification(message) {
+            const notificationArea = document.getElementById('notification-area');
+            const notification = document.createElement('div');
+            notification.className = 'notification bg-white border-l-4 border-primary p-4 rounded-lg shadow-lg mb-2';
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-bullhorn text-primary text-xl ml-3"></i>
+                    <div>
+                        <div class="font-semibold text-gray-900">تنبيه</div>
+                        <div class="text-gray-600">${message}</div>
+                        <div class="text-xs text-gray-400">${new Date().toLocaleTimeString('ar-EG')}</div>
+                    </div>
+                </div>
+            `;
+            
+            notificationArea.appendChild(notification);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        function showRandomNotification() {
+            const messages = [
+                'يرجى الحفاظ على الهدوء في قاعة الانتظار',
+                'شكراً لتفهمكم وصبركم',
+                'المركز الطبي الحديث - رعاية صحية متكاملة',
+                'يرجى متابعة دوركم على شاشة العرض'
+            ];
+            
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            showNotification(randomMessage);
+        }
+
+        function playAnnouncement(number, clinicName) {
+            // Simulate audio announcement
+            console.log(`Playing announcement: الرقم ${number} في ${clinicName}`);
+            
+            // In a real implementation, this would play audio files
+            // For now, we'll use the Web Speech API if available
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(`على العميل رقم ${number} التوجه إلى ${clinicName}`);
+                utterance.lang = 'ar-SA';
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function simulateQueueUpdates() {
+            // Update random clinic
+            const screenClinics = clinics.filter(clinic => clinic.screen === currentScreen);
+            if (screenClinics.length > 0) {
+                const randomClinic = screenClinics[Math.floor(Math.random() * screenClinics.length)];
+                if (randomClinic.status === 'active') {
+                    randomClinic.current += Math.floor(Math.random() * 3);
+                    randomClinic.lastCall = new Date().toLocaleTimeString('ar-EG', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    populateClinics();
+                }
+            }
+        }
+
+        // Control functions
+        function toggleFullscreen() {
+            const element = document.getElementById('main-display');
+            if (!isFullscreen) {
+                element.classList.add('fullscreen');
+                isFullscreen = true;
+            } else {
+                element.classList.remove('fullscreen');
+                isFullscreen = false;
+            }
+        }
+
+        function zoomIn() {
+            zoomLevel = Math.min(zoomLevel + 0.1, 2);
+            document.getElementById('main-display').style.transform = `scale(${zoomLevel})`;
+        }
+
+        function zoomOut() {
+            zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
+            document.getElementById('main-display').style.transform = `scale(${zoomLevel})`;
+        }
+
+        function logout() {
+            document.getElementById('login-modal').style.display = 'flex';
+            document.getElementById('main-display').classList.add('hidden');
+            document.getElementById('display-login-form').reset();
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F11') {
+                e.preventDefault();
+                toggleFullscreen();
+            } else if (e.key === 'Escape') {
+                if (isFullscreen) {
+                    toggleFullscreen();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

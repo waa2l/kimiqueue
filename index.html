@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الطباب الذكي - Smart Medical QMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'arabic': ['Cairo', 'sans-serif']
+                    },
+                    colors: {
+                        'primary': '#1e40af',
+                        'secondary': '#3b82f6',
+                        'accent': '#60a5fa',
+                        'success': '#10b981',
+                        'warning': '#f59e0b',
+                        'danger': '#ef4444'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-arabic">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-primary">🏥 نظام إدارة الطباب</h1>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4 space-x-reverse">
+                        <a href="index.html" class="text-primary hover:text-secondary px-3 py-2 rounded-md text-sm font-medium transition-colors">الرئيسية</a>
+                        <a href="admin.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">الإدارة</a>
+                        <a href="display.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">العرض</a>
+                        <a href="control.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">التحكم</a>
+                        <a href="client.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">العميل</a>
+                        <a href="about.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">عن النظام</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-gray-700 hover:text-primary focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+                <a href="index.html" class="text-primary block px-3 py-2 rounded-md text-base font-medium">الرئيسية</a>
+                <a href="admin.html" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">الإدارة</a>
+                <a href="display.html" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">العرض</a>
+                <a href="control.html" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">التحكم</a>
+                <a href="client.html" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">العميل</a>
+                <a href="about.html" class="text-gray-700 hover:text-primary block px-3 py-2 rounded-md text-base font-medium">عن النظام</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl font-bold mb-6">نظام إدارة الطوابير الذكي</h1>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">حلول متكاملة لإدارة الطوابير في المراكز الطبية مع دعم كامل للغة العربية والتحديثات الفورية والإعلانات الصوتية</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="window.location.href='display.html'" class="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors card-hover">
+                    <i class="fas fa-desktop mr-2"></i>شاشة العرض
+                </button>
+                <button onclick="window.location.href='control.html'" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors card-hover">
+                    <i class="fas fa-cogs mr-2"></i>لوحة التحكم
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Stats -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="bg-gradient-to-r from-primary to-secondary text-white p-6 rounded-lg card-hover">
+                    <div class="flex items-center">
+                        <div class="text-3xl">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="mr-4">
+                            <p class="text-sm opacity-90">العملاء اليوم</p>
+                            <p class="text-2xl font-bold" id="daily-patients">127</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-success to-green-500 text-white p-6 rounded-lg card-hover">
+                    <div class="flex items-center">
+                        <div class="text-3xl">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="mr-4">
+                            <p class="text-sm opacity-90">العيادات النشطة</p>
+                            <p class="text-2xl font-bold" id="active-clinics">8</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-warning to-orange-500 text-white p-6 rounded-lg card-hover">
+                    <div class="flex items-center">
+                        <div class="text-3xl">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="mr-4">
+                            <p class="text-sm opacity-90">متوسط الانتظار</p>
+                            <p class="text-2xl font-bold" id="avg-wait-time">12 دقيقة</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-danger to-red-500 text-white p-6 rounded-lg card-hover">
+                    <div class="flex items-center">
+                        <div class="text-3xl">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="mr-4">
+                            <p class="text-sm opacity-90">كفاءة النظام</p>
+                            <p class="text-2xl font-bold" id="system-efficiency">94%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Features -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">المميزات الرئيسية</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">نظام متكامل يوفر جميع الأدوات اللازمة لإدارة الطوابير بكفاءة وفعالية</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-volume-up"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">الإعلانات الصوتية</h3>
+                    <p class="text-gray-600">نطق أسماء الأرقام والعيادات باللغة العربية مع دعم ملفات صوتية مخصصة</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">التحديثات الفورية</h3>
+                    <p class="text-gray-600">تحديث لحظي لجميع الشاشات والأجهزة المتصلة بالنظام</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">الوصول عبر الهاتف</h3>
+                    <p class="text-gray-600">متابعة الحالة من خلال QR Code دون الحاجة للبقاء أمام الشاشة</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-print"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">طباعة التذاكر</h3>
+                    <p class="text-gray-600">طباعة أرقام العملاء بتنسيق منظم ومريح للقراءة</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">حجز المواعيد</h3>
+                    <p class="text-gray-600">نظام متكامل لحجز المواعيد مع إدارة الشفتات والعيادات</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <div class="text-primary text-4xl mb-4">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">التقارير والإحصائيات</h3>
+                    <p class="text-gray-600">تقارير مفصلة عن أداء النظام وكفاءة العيادات</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Queue Preview -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">عرض حي للطوابير</h2>
+                <p class="text-lg text-gray-600">متابعة حية لحالة الطوابير في جميع العيادات</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="clinic-cards">
+                <!-- Clinic cards will be populated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">الوصول السريع</h2>
+                <p class="text-lg text-gray-600">الوصول المباشر إلى أقسام النظام المختلفة</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <button onclick="window.location.href='admin.html'" class="bg-primary text-white p-6 rounded-lg text-center card-hover">
+                    <i class="fas fa-cog text-3xl mb-3"></i>
+                    <h3 class="text-lg font-semibold">الإدارة</h3>
+                    <p class="text-sm opacity-90">إعدادات النظام</p>
+                </button>
+                <button onclick="window.location.href='display.html'" class="bg-success text-white p-6 rounded-lg text-center card-hover">
+                    <i class="fas fa-desktop text-3xl mb-3"></i>
+                    <h3 class="text-lg font-semibold">شاشة العرض</h3>
+                    <p class="text-sm opacity-90">عرض الطوابير</p>
+                </button>
+                <button onclick="window.location.href='control.html'" class="bg-warning text-white p-6 rounded-lg text-center card-hover">
+                    <i class="fas fa-gamepad text-3xl mb-3"></i>
+                    <h3 class="text-lg font-semibold">لوحة التحكم</h3>
+                    <p class="text-sm opacity-90">التحكم في العيادات</p>
+                </button>
+                <button onclick="window.location.href='client.html'" class="bg-secondary text-white p-6 rounded-lg text-center card-hover">
+                    <i class="fas fa-user text-3xl mb-3"></i>
+                    <h3 class="text-lg font-semibold">صفحة العميل</h3>
+                    <p class="text-sm opacity-90">متابعة الدور</p>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h3 class="text-2xl font-bold mb-4">نظام إدارة الطباب الذكي</h3>
+                <p class="text-gray-400 mb-6">حلول متكاملة لإدارة الطوابير في المراكز الطبية</p>
+                <div class="flex justify-center space-x-6 space-x-reverse">
+                    <span class="text-gray-400">© 2025 جميع الحقوق محفوظة</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Sample clinic data
+        const clinics = [
+            { name: 'عيادة طب الأسرة', current: 15, status: 'active', lastCall: '08:30' },
+            { name: 'عيادة الباطنية', current: 22, status: 'active', lastCall: '08:45' },
+            { name: 'عيادة الأطفال', current: 8, status: 'paused', lastCall: '08:15' },
+            { name: 'عيادة النساء', current: 31, status: 'active', lastCall: '08:50' },
+            { name: 'عيادة الأسنان', current: 12, status: 'active', lastCall: '08:25' },
+            { name: 'عيادة الجلدية', current: 5, status: 'active', lastCall: '08:40' }
+        ];
+
+        // Populate clinic cards
+        function populateClinicCards() {
+            const container = document.getElementById('clinic-cards');
+            container.innerHTML = '';
+
+            clinics.forEach((clinic, index) => {
+                const card = document.createElement('div');
+                card.className = `bg-white p-6 rounded-lg shadow-lg card-hover ${clinic.status === 'paused' ? 'opacity-60' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">${clinic.name}</h3>
+                        <span class="px-2 py-1 rounded text-xs ${clinic.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${clinic.status === 'active' ? 'نشطة' : 'متوقفة'}
+                        </span>
+                    </div>
+                    <div class="text-center mb-4">
+                        <div class="text-4xl font-bold text-primary mb-2">${clinic.current}</div>
+                        <div class="text-sm text-gray-600">الرقم الحالي</div>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-500">
+                        <span>آخر نداء: ${clinic.lastCall}</span>
+                        <span class="pulse-animation">🔴</span>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Initialize
+        populateClinicCards();
+
+        // Simulate real-time updates
+        setInterval(() => {
+            // Update random clinic number
+            const randomIndex = Math.floor(Math.random() * clinics.length);
+            if (clinics[randomIndex].status === 'active') {
+                clinics[randomIndex].current += Math.floor(Math.random() * 3);
+                clinics[randomIndex].lastCall = new Date().toLocaleTimeString('ar-EG', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                populateClinicCards();
+            }
+        }, 5000);
+
+        // Update stats periodically
+        setInterval(() => {
+            document.getElementById('daily-patients').textContent = Math.floor(Math.random() * 50) + 100;
+            document.getElementById('avg-wait-time').textContent = Math.floor(Math.random() * 10) + 8 + ' دقيقة';
+        }, 10000);
+    </script>
+</body>
+</html>
