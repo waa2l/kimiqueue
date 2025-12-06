@@ -216,14 +216,7 @@
         let isFullscreen = false;
         
         // Sample clinic data with screen assignments
-        let clinics = [
-            { id: 1, name: 'عيادة طب الأسرة', number: 1, current: 15, status: 'active', screen: 1, lastCall: '08:30' },
-            { id: 2, name: 'عيادة الباطنية', number: 2, current: 22, status: 'active', screen: 1, lastCall: '08:45' },
-            { id: 3, name: 'عيادة الأطفال', number: 3, current: 8, status: 'paused', screen: 2, lastCall: '08:15' },
-            { id: 4, name: 'عيادة النساء', number: 4, current: 31, status: 'active', screen: 1, lastCall: '08:50' },
-            { id: 5, name: 'عيادة الأسنان', number: 5, current: 12, status: 'active', screen: 3, lastCall: '08:25' },
-            { id: 6, name: 'عيادة الجلدية', number: 6, current: 5, status: 'active', screen: 1, lastCall: '08:40' }
-        ];
+let clinics = []; // مصفوفة فارغة ستمتلئ من قاعدة البيانات
 
         // Doctor images for carousel
         const doctorImages = [
@@ -251,17 +244,40 @@
             }
         });
 
-        function initializeDisplay() {
-            updateTime();
-            populateClinics();
-            startDoctorCarousel();
-            startTicker();
+async function initializeDisplay() {
+    // 1. جلب البيانات الأولية من Supabase
+    clinics = await window.supabaseHelpers.getClinics();
+    
+    updateTime();
+    populateClinics();
+    startDoctorCarousel();
+    startTicker();
+    
+    // 2. تفعيل الاشتراك في التحديثات الفورية
+    window.supabaseHelpers.subscribeToClinicUpdates((updatedClinic) => {
+        // البحث عن العيادة وتحديث بياناتها في المصفوفة المحلية
+        const index = clinics.findIndex(c => c.id === updatedClinic.id);
+        if (index !== -1) {
+            clinics[index] = { 
+                ...clinics[index], 
+                ...updatedClinic, 
+                current: updatedClinic.current_number, // تأكيد التحديث
+                lastCall: new Date().toLocaleTimeString('ar-EG')
+            };
             
-            // Simulate real-time updates
-            setInterval(updateTime, 1000);
-            setInterval(simulateQueueUpdates, 5000);
-            setInterval(showRandomNotification, 15000);
+            // تشغيل التنبيه الصوتي إذا تغير الرقم
+            playAnnouncement(updatedClinic.current_number, clinics[index].name);
+            showNotification(`الآن الدور رقم ${updatedClinic.current_number} في ${clinics[index].name}`);
+            
+            // إعادة رسم الكروت
+            populateClinics();
         }
+    });
+
+    // إزالة المحاكاة الوهمية (simulateQueueUpdates) لأننا نستخدم بيانات حقيقية الآن
+    setInterval(updateTime, 1000);
+    setInterval(showRandomNotification, 15000);
+}
 
         function updateTime() {
             const now = new Date();
