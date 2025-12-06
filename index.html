@@ -286,7 +286,22 @@
       container.appendChild(card);
     });
   }
-  
+  function createClinicCard(clinic) {
+    const div = document.createElement('div');
+    // تنسيق الكارت بناءً على القالب الموجود في ملفاتك
+    div.className = 'bg-white p-6 rounded-lg shadow-lg card-hover';
+    div.innerHTML = `
+        <div class="text-primary text-4xl mb-4">
+            <i class="fas fa-user-md"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3">${clinic.name}</h3>
+        <p class="text-gray-600 mb-2">الدور الحالي: <span class="font-bold text-2xl">${clinic.current_number}</span></p>
+        <p class="text-sm ${clinic.status === 'active' ? 'text-green-500' : 'text-red-500'}">
+            ${clinic.status === 'active' ? 'مفتوحة' : 'مغلقة/متوقفة'}
+        </p>
+    `;
+    return div;
+}
   // تفعيل التحديثات الفورية
   window.supabaseHelpers.subscribeToClinicUpdates((payload) => {
     console.log('Clinic updated:', payload);
