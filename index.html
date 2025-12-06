@@ -272,75 +272,29 @@
         </div>
     </footer>
 
-    <script>
-        // Mobile menu toggle
-        document.getElementById('mobile-menu-button').addEventListener('click', function() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        // Sample clinic data
-        const clinics = [
-            { name: 'عيادة طب الأسرة', current: 15, status: 'active', lastCall: '08:30' },
-            { name: 'عيادة الباطنية', current: 22, status: 'active', lastCall: '08:45' },
-            { name: 'عيادة الأطفال', current: 8, status: 'paused', lastCall: '08:15' },
-            { name: 'عيادة النساء', current: 31, status: 'active', lastCall: '08:50' },
-            { name: 'عيادة الأسنان', current: 12, status: 'active', lastCall: '08:25' },
-            { name: 'عيادة الجلدية', current: 5, status: 'active', lastCall: '08:40' }
-        ];
-
-        // Populate clinic cards
-        function populateClinicCards() {
-            const container = document.getElementById('clinic-cards');
-            container.innerHTML = '';
-
-            clinics.forEach((clinic, index) => {
-                const card = document.createElement('div');
-                card.className = `bg-white p-6 rounded-lg shadow-lg card-hover ${clinic.status === 'paused' ? 'opacity-60' : ''}`;
-                
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900">${clinic.name}</h3>
-                        <span class="px-2 py-1 rounded text-xs ${clinic.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                            ${clinic.status === 'active' ? 'نشطة' : 'متوقفة'}
-                        </span>
-                    </div>
-                    <div class="text-center mb-4">
-                        <div class="text-4xl font-bold text-primary mb-2">${clinic.current}</div>
-                        <div class="text-sm text-gray-600">الرقم الحالي</div>
-                    </div>
-                    <div class="flex justify-between text-sm text-gray-500">
-                        <span>آخر نداء: ${clinic.lastCall}</span>
-                        <span class="pulse-animation">🔴</span>
-                    </div>
-                `;
-                
-                container.appendChild(card);
-            });
-        }
-
-        // Initialize
-        populateClinicCards();
-
-        // Simulate real-time updates
-        setInterval(() => {
-            // Update random clinic number
-            const randomIndex = Math.floor(Math.random() * clinics.length);
-            if (clinics[randomIndex].status === 'active') {
-                clinics[randomIndex].current += Math.floor(Math.random() * 3);
-                clinics[randomIndex].lastCall = new Date().toLocaleTimeString('ar-EG', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-                populateClinicCards();
-            }
-        }, 5000);
-
-        // Update stats periodically
-        setInterval(() => {
-            document.getElementById('daily-patients').textContent = Math.floor(Math.random() * 50) + 100;
-            document.getElementById('avg-wait-time').textContent = Math.floor(Math.random() * 10) + 8 + ' دقيقة';
-        }, 10000);
-    </script>
+ <script>
+  // تحميل العيادات من Supabase
+  async function loadClinics() {
+    const clinics = await window.supabaseHelpers.getClinics();
+    
+    // عرض العيادات
+    const container = document.getElementById('clinic-cards');
+    container.innerHTML = '';
+    
+    clinics.forEach(clinic => {
+      const card = createClinicCard(clinic);
+      container.appendChild(card);
+    });
+  }
+  
+  // تفعيل التحديثات الفورية
+  window.supabaseHelpers.subscribeToClinicUpdates((payload) => {
+    console.log('Clinic updated:', payload);
+    loadClinics(); // إعادة تحميل البيانات
+  });
+  
+  // تحميل البيانات عند فتح الصفحة
+  document.addEventListener('DOMContentLoaded', loadClinics);
+</script>
 </body>
 </html>
