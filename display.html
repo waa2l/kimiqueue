@@ -289,40 +289,6 @@ async function initializeDisplay() {
             const dateString = now.toLocaleDateString('ar-EG');
             document.getElementById('current-time').textContent = `${dateString} ${timeString}`;
         }
-
-        function populateClinics() {
-            const container = document.getElementById('clinics-container');
-            container.innerHTML = '';
-            
-            // Filter clinics for current screen
-            const screenClinics = clinics.filter(clinic => clinic.screen === currentScreen);
-            
-            screenClinics.forEach(clinic => {
-                const card = document.createElement('div');
-                card.className = `clinic-card ${clinic.status} p-6 rounded-lg shadow-lg cursor-pointer`;
-                
-                card.innerHTML = `
-                    <div class="text-center">
-                        <div class="text-sm opacity-90 mb-2">${clinic.name}</div>
-                        <div class="text-6xl font-bold mb-2">${clinic.current}</div>
-                        <div class="text-sm opacity-90 mb-2">الرقم الحالي</div>
-                        <div class="flex justify-between items-center text-xs opacity-75">
-                            <span>آخر نداء: ${clinic.lastCall}</span>
-                            <span class="pulse-glow px-2 py-1 rounded">${clinic.status === 'active' ? 'نشطة' : 'متوقفة'}</span>
-                        </div>
-                    </div>
-                `;
-                
-                // Add click handler for announcements
-                card.addEventListener('click', () => {
-                    showNotification(`الآن الدور رقم ${clinic.current} في ${clinic.name}`);
-                    playAnnouncement(clinic.current, clinic.name);
-                });
-                
-                container.appendChild(card);
-            });
-        }
-
         function startDoctorCarousel() {
             let currentImage = 0;
             const carousel = document.getElementById('doctor-carousel');
@@ -372,17 +338,7 @@ async function initializeDisplay() {
             }, 5000);
         }
 
-        function showRandomNotification() {
-            const messages = [
-                'يرجى الحفاظ على الهدوء في قاعة الانتظار',
-                'شكراً لتفهمكم وصبركم',
-                'المركز الطبي الحديث - رعاية صحية متكاملة',
-                'يرجى متابعة دوركم على شاشة العرض'
-            ];
-            
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            showNotification(randomMessage);
-        }
+
 
         function playAnnouncement(number, clinicName) {
             // Simulate audio announcement
@@ -398,21 +354,7 @@ async function initializeDisplay() {
             }
         }
 
-        function simulateQueueUpdates() {
-            // Update random clinic
-            const screenClinics = clinics.filter(clinic => clinic.screen === currentScreen);
-            if (screenClinics.length > 0) {
-                const randomClinic = screenClinics[Math.floor(Math.random() * screenClinics.length)];
-                if (randomClinic.status === 'active') {
-                    randomClinic.current += Math.floor(Math.random() * 3);
-                    randomClinic.lastCall = new Date().toLocaleTimeString('ar-EG', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                    populateClinics();
-                }
-            }
-        }
+
 
         // Control functions
         function toggleFullscreen() {
