@@ -217,9 +217,18 @@
         </div>
     </footer>
 
+    <script src="supabaseClient.js"></script>
     <script>
+        function checkSupabaseReady() {
+            return new Promise((resolve) => {
+                if (window.supabaseHelpers) resolve();
+                else setTimeout(() => checkSupabaseReady().then(resolve), 100);
+            });
+        }
+
         // Load clinics from Supabase
         async function loadClinics() {
+            await checkSupabaseReady();
             try {
                 const clinics = await window.supabaseHelpers.getClinics();
                 const container = document.getElementById('clinic-cards');
