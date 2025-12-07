@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabaseClient.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
@@ -66,7 +65,6 @@
                 <h1 class="text-2xl font-bold text-primary">🏥 نظام إدارة الطباب</h1>
                 <div class="flex space-x-4 space-x-reverse">
                     <a href="index.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md">الرئيسية</a>
-                    <a href="admin.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md">الإدارة</a>
                     <a href="display.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md">العرض</a>
                 </div>
             </div>
@@ -84,7 +82,7 @@
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">العيادة</label>
                     <select id="clinic-select" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary" required>
-                        <option value="">اختر العيادة</option>
+                        <option value="">جاري التحميل...</option>
                     </select>
                 </div>
                 <div class="mb-6">
@@ -182,7 +180,9 @@
             <!-- Recent Activity -->
             <div class="mt-8 bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-semibold mb-4">النشاط الأخير</h3>
-                <div class="space-y-2" id="recent-activity"></div>
+                <div class="space-y-2" id="recent-activity">
+                    <p class="text-gray-500 text-center">لا توجد أنشطة بعد</p>
+                </div>
             </div>
         </div>
     </div>
@@ -199,22 +199,44 @@
         </div>
     </div>
 
+    <script src="supabaseClient.js"></script>
     <script>
         let currentClinic = null;
         let currentNumber = 0;
         let clinics = [];
 
-        async function loadClinics() {
-            clinics = await window.supabaseHelpers.getClinics();
-            const select = document.getElementById('clinic-select');
-            select.innerHTML = '<option value="">اختر العيادة</option>';
-            
-            clinics.forEach(clinic => {
-                const option = document.createElement('option');
-                option.value = clinic.id;
-                option.textContent = clinic.name;
-                select.appendChild(option);
+        // Wait for supabaseHelpers
+        function checkSupabaseReady() {
+            return new Promise((resolve) => {
+                if (window.supabaseHelpers) {
+                    resolve();
+                } else {
+                    setTimeout(() => checkSupabaseReady().then(resolve), 100);
+                }
             });
+        }
+
+        async function loadClinics() {
+            console.log('📥 Loading clinics...');
+            await checkSupabaseReady();
+            
+            try {
+                clinics = await window.supabaseHelpers.getClinics();
+                console.log('✅ Clinics loaded:', clinics);
+                
+                const select = document.getElementById('clinic-select');
+                select.innerHTML = '<option value="">اختر العيادة</option>';
+                
+                clinics.forEach(clinic => {
+                    const option = document.createElement('option');
+                    option.value = clinic.id;
+                    option.textContent = `${clinic.name} (الرقم الحالي: ${clinic.current || 0})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading clinics:', error);
+                document.getElementById('clinic-select').innerHTML = '<option value="">خطأ في التحميل</option>';
+            }
         }
 
         document.getElementById('clinic-selection-form').addEventListener('submit', async function(e) {
@@ -241,6 +263,9 @@
             document.getElementById('current-number').textContent = currentNumber;
             
             updateClinicStatus(currentClinic.status);
+            
+            // Initialize stats
+            document.getElementById('served-today').textContent = currentNumber;
         }
 
         function updateClinicStatus(status) {
@@ -253,6 +278,12 @@
 
         function addActivity(message) {
             const activityContainer = document.getElementById('recent-activity');
+            
+            // Remove "no activities" message
+            if (activityContainer.querySelector('p.text-gray-500')) {
+                activityContainer.innerHTML = '';
+            }
+            
             const time = new Date().toLocaleTimeString('ar-EG', { 
                 hour: '2-digit', 
                 minute: '2-digit',
@@ -282,11 +313,17 @@
             currentNumber++;
             document.getElementById('current-number').textContent = currentNumber;
             
-            await window.supabaseHelpers.updateQueue(currentClinic.id, currentNumber);
-            addActivity(`تم استدعاء العميل رقم ${currentNumber}`);
-            
-            const served = parseInt(document.getElementById('served-today').textContent);
-            document.getElementById('served-today').textContent = served + 1;
+            const success = await window.supabaseHelpers.updateQueue(currentClinic.id, currentNumber);
+            if (success) {
+                addActivity(`تم استدعاء العميل رقم ${currentNumber}`);
+                
+                const served = parseInt(document.getElementById('served-today').textContent);
+                document.getElementById('served-today').textContent = served + 1;
+            } else {
+                alert('حدث خطأ في التحديث');
+                currentNumber--; // Revert
+                document.getElementById('current-number').textContent = currentNumber;
+            }
         }
 
         async function previousPatient() {
@@ -309,6 +346,7 @@
                 document.getElementById('current-number').textContent = currentNumber;
                 await window.supabaseHelpers.updateQueue(currentClinic.id, currentNumber);
                 addActivity('تم تصفير العيادة');
+                document.getElementById('served-today').textContent = 0;
             }
         }
 
@@ -353,6 +391,7 @@
             currentClinic = null;
         }
 
+        // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             if (currentClinic) {
                 switch(e.key) {
@@ -374,6 +413,8 @@
             }
         });
 
+        // Initialize
+        console.log('✅ Control script loaded');
         loadClinics();
     </script>
 </body>
