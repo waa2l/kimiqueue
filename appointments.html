@@ -6,21 +6,16 @@
     <title>حجز المواعيد - نظام إدارة الطباب</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <!-- Supabase Client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabaseClient.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        'arabic': ['Cairo', 'sans-serif']
-                    },
+                    fontFamily: { 'arabic': ['Cairo', 'sans-serif'] },
                     colors: {
                         'primary': '#1e40af',
                         'secondary': '#3b82f6',
-                        'accent': '#60a5fa',
                         'success': '#10b981',
                         'warning': '#f59e0b',
                         'danger': '#ef4444'
@@ -30,9 +25,7 @@
         }
     </script>
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-        }
+        body { font-family: 'Cairo', sans-serif; }
         .time-slot {
             transition: all 0.2s ease;
         }
@@ -51,7 +44,7 @@
         .calendar-day {
             transition: all 0.2s ease;
         }
-        .calendar-day:hover {
+        .calendar-day:hover:not(.disabled) {
             background-color: #3b82f6;
             color: white;
         }
@@ -67,94 +60,69 @@
     </style>
 </head>
 <body class="bg-gray-50 font-arabic">
-    <!-- Navigation -->
     <nav class="bg-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <h1 class="text-2xl font-bold text-primary">🏥 نظام إدارة الطباب</h1>
-                    </div>
-                </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4 space-x-reverse">
-                        <a href="index.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">الرئيسية</a>
-                        <a href="admin.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">الإدارة</a>
-                        <a href="display.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">العرض</a>
-                        <a href="control.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">التحكم</a>
-                        <a href="client.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">العميل</a>
-                        <a href="about.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">عن النظام</a>
-                    </div>
+                <h1 class="text-2xl font-bold text-primary">🏥 نظام إدارة الطباب</h1>
+                <div class="flex space-x-4 space-x-reverse">
+                    <a href="index.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md">الرئيسية</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <!-- Header -->
     <div class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="py-6">
                 <h1 class="text-3xl font-bold text-gray-900">حجز المواعيد</h1>
-                <p class="mt-2 text-gray-600">احجز موعدك بسهولة واختر العيادة والطبيب المناسب</p>
+                <p class="mt-2 text-gray-600">احجز موعدك بسهولة</p>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Booking Form -->
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h2 class="text-2xl font-bold mb-6">معلومات الحجز</h2>
                     
                     <form id="appointment-form" class="space-y-6">
-                        <!-- Personal Information -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل *</label>
-                                <input type="text" id="patient-name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                                <input type="text" id="patient-name" required class="w-full px-3 py-2 border rounded-lg">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">الرقم القومي *</label>
-                                <input type="text" id="national-id" required pattern="[0-9]{14}" maxlength="14" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                                <input type="text" id="national-id" required pattern="[0-9]{14}" maxlength="14" class="w-full px-3 py-2 border rounded-lg">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف *</label>
-                                <input type="tel" id="phone-number" required pattern="[0-9]{11}" maxlength="11" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                                <input type="tel" id="phone-number" required pattern="[0-9]{11}" maxlength="11" class="w-full px-3 py-2 border rounded-lg">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
-                                <input type="email" id="email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                                <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg">
                             </div>
                         </div>
 
-                        <!-- Clinic Selection -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">اختيار العيادة *</label>
-                            <select id="clinic-select" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
-                                <option value="">اختر العيادة</option>
-                                <option value="1">عيادة طب الأسرة</option>
-                                <option value="2">عيادة الباطنية</option>
-                                <option value="3">عيادة الأطفال</option>
-                                <option value="4">عيادة النساء</option>
-                                <option value="5">عيادة الأسنان</option>
-                                <option value="6">عيادة الجلدية</option>
+                            <select id="clinic-select" required class="w-full px-3 py-2 border rounded-lg">
+                                <option value="">جاري التحميل...</option>
                             </select>
                         </div>
 
-                        <!-- Doctor Selection -->
                         <div id="doctor-selection" style="display: none;">
                             <label class="block text-sm font-medium text-gray-700 mb-2">اختيار الطبيب</label>
-                            <select id="doctor-select" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary">
+                            <select id="doctor-select" class="w-full px-3 py-2 border rounded-lg">
                                 <option value="">أي طبيب متاح</option>
                             </select>
                         </div>
 
-                        <!-- Date Selection -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">اختيار التاريخ *</label>
                             <div id="calendar-container" class="bg-gray-50 p-4 rounded-lg">
@@ -176,158 +144,140 @@
                                     <div class="text-center text-sm font-medium text-gray-500 py-2">الجمعة</div>
                                     <div class="text-center text-sm font-medium text-gray-500 py-2">السبت</div>
                                 </div>
-                                <div id="calendar-days" class="grid grid-cols-7 gap-2">
-                                    <!-- Calendar days will be populated by JavaScript -->
-                                </div>
+                                <div id="calendar-days" class="grid grid-cols-7 gap-2"></div>
                             </div>
                         </div>
 
-                        <!-- Time Selection -->
                         <div id="time-selection" style="display: none;">
                             <label class="block text-sm font-medium text-gray-700 mb-2">اختيار الوقت *</label>
-                            <div class="grid grid-cols-3 md:grid-cols-4 gap-3" id="time-slots">
-                                <!-- Time slots will be populated by JavaScript -->
-                            </div>
+                            <div class="grid grid-cols-3 md:grid-cols-4 gap-3" id="time-slots"></div>
                         </div>
 
-                        <!-- Visit Reason -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">سبب الزيارة</label>
-                            <textarea id="visit-reason" rows="3" placeholder="اكتب سبب الزيارة باختصار..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"></textarea>
+                            <textarea id="visit-reason" rows="3" placeholder="اكتب سبب الزيارة..." class="w-full px-3 py-2 border rounded-lg"></textarea>
                         </div>
 
-                        <!-- Submit Button -->
-                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-secondary transition-colors font-semibold">
+                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-secondary font-semibold">
                             <i class="fas fa-calendar-check ml-2"></i>حجز الموعد
                         </button>
                     </form>
                 </div>
             </div>
 
-            <!-- Sidebar -->
             <div class="space-y-6">
-                <!-- Today's Appointments -->
                 <div class="bg-white rounded-lg shadow-lg p-6">
                     <h3 class="text-lg font-semibold mb-4">مواعيد اليوم</h3>
                     <div class="space-y-3" id="today-appointments">
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <div>
-                                <div class="font-medium">د. أحمد محمد</div>
-                                <div class="text-sm text-gray-600">عيادة طب الأسرة</div>
-                            </div>
-                            <div class="text-sm text-primary font-semibold">09:00 ص</div>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <div>
-                                <div class="font-medium">د. فاطمة علي</div>
-                                <div class="text-sm text-gray-600">عيادة الباطنية</div>
-                            </div>
-                            <div class="text-sm text-primary font-semibold">10:30 ص</div>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <div>
-                                <div class="font-medium">د. خالد حسن</div>
-                                <div class="text-sm text-gray-600">عيادة الأطفال</div>
-                            </div>
-                            <div class="text-sm text-primary font-semibold">12:00 م</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Stats -->
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-lg font-semibold mb-4">إحصائيات سريعة</h3>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">مواعيد اليوم</span>
-                            <span class="font-semibold text-primary">24</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">تم إلغاؤها</span>
-                            <span class="font-semibold text-danger">3</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">تم تأكيدها</span>
-                            <span class="font-semibold text-success">21</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-600">في الانتظار</span>
-                            <span class="font-semibold text-warning">5</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Available Slots -->
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-lg font-semibold mb-4">أوقات متاحة</h3>
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center p-2 bg-green-50 rounded text-sm">
-                            <span>الشفت الصباحي</span>
-                            <span class="text-success font-semibold">8:00 - 14:00</span>
-                        </div>
-                        <div class="flex justify-between items-center p-2 bg-blue-50 rounded text-sm">
-                            <span>الشفت المسائي</span>
-                            <span class="text-primary font-semibold">14:00 - 20:00</span>
-                        </div>
+                        <p class="text-gray-500 text-center">جاري التحميل...</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Success Modal -->
     <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
             <div class="text-success text-6xl mb-4">
                 <i class="fas fa-check-circle"></i>
             </div>
             <h3 class="text-2xl font-bold mb-4">تم حجز الموعد بنجاح!</h3>
-            <p class="text-gray-600 mb-6">سيتم إرسال تأكيد الحجز إلى بريدك الإلكتروني ورقم هاتفك</p>
+            <p class="text-gray-600 mb-6">سيتم إرسال تأكيد الحجز</p>
             <div class="bg-gray-50 p-4 rounded-lg mb-6">
                 <div class="text-sm text-gray-600 mb-2">رقم الحجز</div>
-                <div class="text-2xl font-bold text-primary" id="booking-number">#20251206001</div>
+                <div class="text-2xl font-bold text-primary" id="booking-number"></div>
             </div>
-            <button onclick="closeSuccessModal()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary transition-colors">
+            <button onclick="closeSuccessModal()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary">
                 حسناً
             </button>
         </div>
     </div>
 
+    <script src="supabaseClient.js"></script>
     <script>
         let selectedDate = null;
         let selectedTime = null;
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
+        let clinics = [];
+        let doctors = [];
 
-        // Sample doctors data
-        const doctorsByClinic = {
-            1: [
-                { id: 1, name: 'د. أحمد محمد', specialty: 'طب أسرة' },
-                { id: 2, name: 'د. ليلى أحمد', specialty: 'طب أسرة' }
-            ],
-            2: [
-                { id: 3, name: 'د. فاطمة علي', specialty: 'باطنية' },
-                { id: 4, name: 'د. خالد حسن', specialty: 'باطنية' }
-            ],
-            3: [
-                { id: 5, name: 'د. سارة محمد', specialty: 'أطفال' },
-                { id: 6, name: 'د. عمرو خالد', specialty: 'أطفال' }
-            ],
-            4: [
-                { id: 7, name: 'د. ندى يوسف', specialty: 'نساء' },
-                { id: 8, name: 'د. منى سامي', specialty: 'نساء' }
-            ],
-            5: [
-                { id: 9, name: 'د. طارق محمود', specialty: 'أسنان' },
-                { id: 10, name: 'د. رنا أحمد', specialty: 'أسنان' }
-            ],
-            6: [
-                { id: 11, name: 'د. هاني فتحي', specialty: 'جلدية' },
-                { id: 12, name: 'د. دينا سمير', specialty: 'جلدية' }
-            ]
-        };
+        function checkSupabaseReady() {
+            return new Promise((resolve) => {
+                if (window.supabaseHelpers) resolve();
+                else setTimeout(() => checkSupabaseReady().then(resolve), 100);
+            });
+        }
 
-        // Initialize calendar
+        async function initialize() {
+            await checkSupabaseReady();
+            await loadClinics();
+            await loadTodayAppointments();
+            initializeCalendar();
+        }
+
+        async function loadClinics() {
+            clinics = await window.supabaseHelpers.getClinics();
+            const select = document.getElementById('clinic-select');
+            select.innerHTML = '<option value="">اختر العيادة</option>';
+            
+            clinics.forEach(clinic => {
+                const option = document.createElement('option');
+                option.value = clinic.id;
+                option.textContent = clinic.name;
+                select.appendChild(option);
+            });
+        }
+
+        async function loadTodayAppointments() {
+            const today = new Date().toISOString().split('T')[0];
+            const appointments = await window.supabaseHelpers.getAppointments(today);
+            
+            const container = document.getElementById('today-appointments');
+            container.innerHTML = '';
+            
+            if (appointments.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center">لا توجد مواعيد اليوم</p>';
+                return;
+            }
+            
+            appointments.slice(0, 5).forEach(apt => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-medium">${apt.clinics?.name || 'غير محدد'}</div>
+                        <div class="text-sm text-gray-600">${apt.patient_name}</div>
+                    </div>
+                    <div class="text-sm text-primary font-semibold">${apt.appointment_time?.substring(0, 5) || '--:--'}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        document.getElementById('clinic-select').addEventListener('change', async function() {
+            const clinicId = this.value;
+            const doctorSelection = document.getElementById('doctor-selection');
+            
+            if (clinicId) {
+                doctorSelection.style.display = 'block';
+                doctors = await window.supabaseHelpers.getDoctors();
+                const clinicDoctors = doctors.filter(d => d.clinic_id == clinicId);
+                
+                const select = document.getElementById('doctor-select');
+                select.innerHTML = '<option value="">أي طبيب متاح</option>';
+                
+                clinicDoctors.forEach(doctor => {
+                    const option = document.createElement('option');
+                    option.value = doctor.id;
+                    option.textContent = `${doctor.name} - ${doctor.specialty}`;
+                    select.appendChild(option);
+                });
+            } else {
+                doctorSelection.style.display = 'none';
+            }
+        });
+
         function initializeCalendar() {
             generateCalendar(currentMonth, currentYear);
         }
@@ -337,31 +287,25 @@
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const today = new Date();
             
-            const monthNames = [
-                'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-                'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-            ];
-            
+            const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
             document.getElementById('calendar-month').textContent = `${monthNames[month]} ${year}`;
             
             const calendarDays = document.getElementById('calendar-days');
             calendarDays.innerHTML = '';
             
-            // Empty cells for days before the first day of the month
             for (let i = 0; i < firstDay; i++) {
-                const emptyDay = document.createElement('div');
-                calendarDays.appendChild(emptyDay);
+                calendarDays.appendChild(document.createElement('div'));
             }
             
-            // Days of the month
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day text-center py-2 px-1 rounded-lg cursor-pointer text-sm';
                 dayElement.textContent = day;
                 
                 const currentDate = new Date(year, month, day);
+                currentDate.setHours(0, 0, 0, 0);
+                today.setHours(0, 0, 0, 0);
                 
-                // Disable past dates
                 if (currentDate < today) {
                     dayElement.classList.add('disabled');
                 } else {
@@ -373,12 +317,7 @@
         }
 
         function selectDate(day, month, year) {
-            // Remove previous selection
-            document.querySelectorAll('.calendar-day.selected').forEach(el => {
-                el.classList.remove('selected');
-            });
-            
-            // Add selection to clicked day
+            document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
             event.target.classList.add('selected');
             
             selectedDate = new Date(year, month, day);
@@ -387,39 +326,32 @@
         }
 
         function generateTimeSlots() {
-            const timeSlotsContainer = document.getElementById('time-slots');
-            timeSlotsContainer.innerHTML = '';
+            const container = document.getElementById('time-slots');
+            container.innerHTML = '';
             
-            // Generate time slots from 8:00 to 20:00
             for (let hour = 8; hour < 20; hour++) {
                 for (let minute = 0; minute < 60; minute += 30) {
                     const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
                     const displayTime = formatTime(hour, minute);
                     
                     const timeSlot = document.createElement('div');
-                    timeSlot.className = 'time-slot text-center p-3 border border-gray-300 rounded-lg cursor-pointer text-sm';
+                    timeSlot.className = 'time-slot text-center p-3 border rounded-lg cursor-pointer text-sm';
                     timeSlot.textContent = displayTime;
                     
-                    // Randomly mark some slots as booked for demo
-                    if (Math.random() > 0.7) {
+                    if (Math.random() > 0.8) {
                         timeSlot.classList.add('booked');
                         timeSlot.textContent += ' (محجوز)';
                     } else {
                         timeSlot.addEventListener('click', () => selectTime(timeString, timeSlot));
                     }
                     
-                    timeSlotsContainer.appendChild(timeSlot);
+                    container.appendChild(timeSlot);
                 }
             }
         }
 
         function selectTime(time, element) {
-            // Remove previous selection
-            document.querySelectorAll('.time-slot.selected').forEach(el => {
-                el.classList.remove('selected');
-            });
-            
-            // Add selection to clicked time slot
+            document.querySelectorAll('.time-slot.selected').forEach(el => el.classList.remove('selected'));
             element.classList.add('selected');
             selectedTime = time;
         }
@@ -448,34 +380,7 @@
             generateCalendar(currentMonth, currentYear);
         }
 
-        // Handle clinic selection
-        document.getElementById('clinic-select').addEventListener('change', function() {
-            const clinicId = this.value;
-            const doctorSelection = document.getElementById('doctor-selection');
-            const doctorSelect = document.getElementById('doctor-select');
-            
-            if (clinicId) {
-                doctorSelection.style.display = 'block';
-                
-                // Clear previous options
-                doctorSelect.innerHTML = '<option value="">أي طبيب متاح</option>';
-                
-                // Add doctors for selected clinic
-                if (doctorsByClinic[clinicId]) {
-                    doctorsByClinic[clinicId].forEach(doctor => {
-                        const option = document.createElement('option');
-                        option.value = doctor.id;
-                        option.textContent = `${doctor.name} - ${doctor.specialty}`;
-                        doctorSelect.appendChild(option);
-                    });
-                }
-            } else {
-                doctorSelection.style.display = 'none';
-            }
-        });
-
-        // Handle form submission
-        document.getElementById('appointment-form').addEventListener('submit', function(e) {
+        document.getElementById('appointment-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             if (!selectedDate || !selectedTime) {
@@ -483,20 +388,34 @@
                 return;
             }
             
-            // Generate booking number
-            const bookingNumber = `#${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
-            document.getElementById('booking-number').textContent = bookingNumber;
+            const appointmentData = {
+                patient_name: document.getElementById('patient-name').value,
+                national_id: document.getElementById('national-id').value,
+                phone: document.getElementById('phone-number').value,
+                email: document.getElementById('email').value || null,
+                clinic_id: parseInt(document.getElementById('clinic-select').value),
+                doctor_id: document.getElementById('doctor-select').value ? parseInt(document.getElementById('doctor-select').value) : null,
+                appointment_date: selectedDate.toISOString().split('T')[0],
+                appointment_time: selectedTime,
+                visit_reason: document.getElementById('visit-reason').value || null,
+                status: 'confirmed',
+                booking_number: `APT${Date.now()}`
+            };
             
-            // Show success modal
-            document.getElementById('success-modal').classList.remove('hidden');
-            document.getElementById('success-modal').classList.add('flex');
+            const result = await window.supabaseHelpers.addAppointment(appointmentData);
             
-            // Reset form
-            this.reset();
-            selectedDate = null;
-            selectedTime = null;
-            document.getElementById('time-selection').style.display = 'none';
-            document.getElementById('doctor-selection').style.display = 'none';
+            if (result) {
+                document.getElementById('booking-number').textContent = appointmentData.booking_number;
+                document.getElementById('success-modal').classList.remove('hidden');
+                document.getElementById('success-modal').classList.add('flex');
+                this.reset();
+                selectedDate = null;
+                selectedTime = null;
+                document.getElementById('time-selection').style.display = 'none';
+                await loadTodayAppointments();
+            } else {
+                alert('حدث خطأ في الحجز');
+            }
         });
 
         function closeSuccessModal() {
@@ -504,10 +423,7 @@
             document.getElementById('success-modal').classList.remove('flex');
         }
 
-        // Initialize calendar on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeCalendar();
-        });
+        initialize();
     </script>
 </body>
 </html>
