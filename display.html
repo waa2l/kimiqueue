@@ -6,17 +6,14 @@
     <title>شاشة العرض - نظام إدارة الطباب</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <!-- Supabase Client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabaseClient.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabaseClient.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        'arabic': ['Cairo', 'sans-serif']
-                    },
+                    fontFamily: { 'arabic': ['Cairo', 'sans-serif'] },
                     colors: {
                         'primary': '#1e40af',
                         'secondary': '#3b82f6',
@@ -67,25 +64,6 @@
         @keyframes slideDown {
             from { transform: translateY(-100%); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
-        }
-        .fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 9999;
-        }
-        .video-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: #000;
-        }
-        .video-container video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
     </style>
 </head>
@@ -138,12 +116,6 @@
                     <button onclick="toggleFullscreen()" class="bg-primary text-white px-3 py-2 rounded-lg hover:bg-secondary transition-colors">
                         <i class="fas fa-expand"></i>
                     </button>
-                    <button onclick="zoomIn()" class="bg-success text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors">
-                        <i class="fas fa-search-plus"></i>
-                    </button>
-                    <button onclick="zoomOut()" class="bg-warning text-white px-3 py-2 rounded-lg hover:bg-yellow-600 transition-colors">
-                        <i class="fas fa-search-minus"></i>
-                    </button>
                     <button onclick="logout()" class="bg-danger text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors">
                         <i class="fas fa-sign-out-alt"></i>
                     </button>
@@ -152,26 +124,21 @@
         </div>
 
         <!-- Notification Area -->
-        <div id="notification-area" class="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4">
-            <!-- Notifications will be inserted here -->
-        </div>
+        <div id="notification-area" class="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4"></div>
 
         <!-- Main Content -->
         <div class="flex-1 flex overflow-hidden">
-            <!-- Video Player (Left Side) -->
+            <!-- Video Player -->
             <div class="w-1/3 bg-black relative">
-                <div class="video-container">
-                    <video id="education-video" autoplay muted loop>
-                        <source src="education.mp4" type="video/mp4">
-                        متصفحك لا يدعم تشغيل الفيديو
-                    </video>
-                    <div class="absolute bottom-4 left-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded">
-                        <div class="text-sm">فيديوهات توعية صحية</div>
+                <div class="video-container h-full flex items-center justify-center">
+                    <div class="text-white text-center">
+                        <i class="fas fa-video text-6xl mb-4"></i>
+                        <p>فيديوهات توعية صحية</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Clinic Cards (Center) -->
+            <!-- Clinic Cards -->
             <div class="flex-1 p-6 bg-gray-100">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full" id="clinics-container">
                     <!-- Clinic cards will be populated here -->
@@ -191,7 +158,7 @@
                     </div>
                 </div>
 
-                <!-- Doctor Images Carousel -->
+                <!-- Doctor Info -->
                 <div class="bg-gray-50 p-4 rounded-lg flex-1">
                     <h3 class="text-lg font-semibold mb-2">أطباؤنا</h3>
                     <div id="doctor-carousel" class="h-48 bg-gray-200 rounded-lg flex items-center justify-center">
@@ -204,27 +171,15 @@
         <!-- Ticker -->
         <div class="bg-primary text-white py-3 overflow-hidden">
             <div class="ticker whitespace-nowrap text-lg font-semibold" id="ticker-content">
-                مرحباً بكم في المركز الطبي الحديث - نسعى لتقديم أفضل خدمة طبية - الرجاء الانتظار بصبر - شكراً لتفهمكم
+                مرحباً بكم في المركز الطبي الحديث
             </div>
         </div>
     </div>
 
     <script>
-        // Sample data
         let currentScreen = 1;
-        let zoomLevel = 1;
         let isFullscreen = false;
-        
-        // Sample clinic data with screen assignments
-let clinics = []; // مصفوفة فارغة ستمتلئ من قاعدة البيانات
-
-        // Doctor images for carousel
-        const doctorImages = [
-            'doctor1.jpg',
-            'doctor2.jpg',
-            'doctor3.jpg',
-            'doctor4.jpg'
-        ];
+        let clinics = [];
 
         // Authentication
         document.getElementById('display-login-form').addEventListener('submit', function(e) {
@@ -232,7 +187,6 @@ let clinics = []; // مصفوفة فارغة ستمتلئ من قاعدة الب
             const screenNumber = document.getElementById('screen-number').value;
             const password = document.getElementById('screen-password').value;
             
-            // Simple authentication (in real app, this would be server-side)
             if (password === 'display123') {
                 currentScreen = parseInt(screenNumber);
                 document.getElementById('current-screen').textContent = currentScreen;
@@ -244,40 +198,69 @@ let clinics = []; // مصفوفة فارغة ستمتلئ من قاعدة الب
             }
         });
 
-async function initializeDisplay() {
-    // 1. جلب البيانات الأولية من Supabase
-    clinics = await window.supabaseHelpers.getClinics();
-    
-    updateTime();
-    populateClinics();
-    startDoctorCarousel();
-    startTicker();
-    
-    // 2. تفعيل الاشتراك في التحديثات الفورية
-    window.supabaseHelpers.subscribeToClinicUpdates((updatedClinic) => {
-        // البحث عن العيادة وتحديث بياناتها في المصفوفة المحلية
-        const index = clinics.findIndex(c => c.id === updatedClinic.id);
-        if (index !== -1) {
-            clinics[index] = { 
-                ...clinics[index], 
-                ...updatedClinic, 
-                current: updatedClinic.current_number, // تأكيد التحديث
-                lastCall: new Date().toLocaleTimeString('ar-EG')
-            };
+        async function initializeDisplay() {
+            await loadClinics();
+            await loadSettings();
+            updateTime();
+            startDoctorCarousel();
             
-            // تشغيل التنبيه الصوتي إذا تغير الرقم
-            playAnnouncement(updatedClinic.current_number, clinics[index].name);
-            showNotification(`الآن الدور رقم ${updatedClinic.current_number} في ${clinics[index].name}`);
-            
-            // إعادة رسم الكروت
+            // Subscribe to real-time updates
+            window.supabaseHelpers.subscribeToClinicUpdates((updatedClinic) => {
+                const index = clinics.findIndex(c => c.id === updatedClinic.id);
+                if (index !== -1) {
+                    clinics[index] = { 
+                        ...clinics[index], 
+                        ...updatedClinic,
+                        lastCall: new Date().toLocaleTimeString('ar-EG')
+                    };
+                    
+                    playAnnouncement(updatedClinic.current_number, clinics[index].name);
+                    showNotification(`الآن الدور رقم ${updatedClinic.current_number} في ${clinics[index].name}`);
+                    populateClinics();
+                }
+            });
+
+            setInterval(updateTime, 1000);
+        }
+
+        async function loadClinics() {
+            clinics = await window.supabaseHelpers.getClinicsByScreen(currentScreen);
             populateClinics();
         }
-    });
 
-    // إزالة المحاكاة الوهمية (simulateQueueUpdates) لأننا نستخدم بيانات حقيقية الآن
-    setInterval(updateTime, 1000);
-    setInterval(showRandomNotification, 15000);
-}
+        async function loadSettings() {
+            const settings = await window.supabaseHelpers.getSettings();
+            if (settings) {
+                document.getElementById('center-name').textContent = settings.center_name || 'المركز الطبي الحديث';
+                document.getElementById('ticker-content').textContent = settings.ticker_content || 'مرحباً بكم';
+            }
+        }
+
+        function populateClinics() {
+            const container = document.getElementById('clinics-container');
+            container.innerHTML = '';
+            
+            clinics.forEach(clinic => {
+                const card = document.createElement('div');
+                card.className = `clinic-card ${clinic.status} bg-white p-6 rounded-lg shadow-lg text-center`;
+                
+                card.innerHTML = `
+                    <div class="text-4xl mb-3">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">${clinic.name}</h3>
+                    <div class="text-5xl font-bold mb-2 ${clinic.status === 'active' ? 'pulse-glow' : ''}">${clinic.current}</div>
+                    <p class="text-sm opacity-75">آخر نداء: ${clinic.lastCall}</p>
+                    <div class="mt-2">
+                        <span class="text-xs px-2 py-1 rounded ${clinic.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${clinic.status === 'active' ? 'نشطة' : 'متوقفة'}
+                        </span>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
 
         function updateTime() {
             const now = new Date();
@@ -289,30 +272,25 @@ async function initializeDisplay() {
             const dateString = now.toLocaleDateString('ar-EG');
             document.getElementById('current-time').textContent = `${dateString} ${timeString}`;
         }
+
         function startDoctorCarousel() {
             let currentImage = 0;
             const carousel = document.getElementById('doctor-carousel');
+            const doctors = ['أحمد', 'فاطمة', 'خالد', 'ليلى'];
+            const specialties = ['طب أسرة', 'باطنية', 'أطفال', 'نساء'];
             
             setInterval(() => {
                 carousel.innerHTML = `
                     <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
                         <div class="text-center text-white">
                             <i class="fas fa-user-md text-4xl mb-2"></i>
-                            <div class="text-sm">د. ${['أحمد', 'فاطمة', 'خالد', 'ليلى'][currentImage]}</div>
-                            <div class="text-xs opacity-75">${['طب أسرة', 'باطنية', 'أطفال', 'نساء'][currentImage]}</div>
+                            <div class="text-sm">د. ${doctors[currentImage]}</div>
+                            <div class="text-xs opacity-75">${specialties[currentImage]}</div>
                         </div>
                     </div>
                 `;
                 currentImage = (currentImage + 1) % 4;
             }, 5000);
-        }
-
-        function startTicker() {
-            const ticker = document.getElementById('ticker-content');
-            const settings = JSON.parse(localStorage.getItem('generalSettings'));
-            if (settings && settings.tickerContent) {
-                ticker.textContent = settings.tickerContent;
-            }
         }
 
         function showNotification(message) {
@@ -325,27 +303,18 @@ async function initializeDisplay() {
                     <div>
                         <div class="font-semibold text-gray-900">تنبيه</div>
                         <div class="text-gray-600">${message}</div>
-                        <div class="text-xs text-gray-400">${new Date().toLocaleTimeString('ar-EG')}</div>
                     </div>
                 </div>
             `;
             
             notificationArea.appendChild(notification);
             
-            // Remove after 5 seconds
             setTimeout(() => {
                 notification.remove();
             }, 5000);
         }
 
-
-
         function playAnnouncement(number, clinicName) {
-            // Simulate audio announcement
-            console.log(`Playing announcement: الرقم ${number} في ${clinicName}`);
-            
-            // In a real implementation, this would play audio files
-            // For now, we'll use the Web Speech API if available
             if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(`على العميل رقم ${number} التوجه إلى ${clinicName}`);
                 utterance.lang = 'ar-SA';
@@ -354,28 +323,15 @@ async function initializeDisplay() {
             }
         }
 
-
-
-        // Control functions
         function toggleFullscreen() {
             const element = document.getElementById('main-display');
-            if (!isFullscreen) {
-                element.classList.add('fullscreen');
+            if (!document.fullscreenElement) {
+                element.requestFullscreen();
                 isFullscreen = true;
             } else {
-                element.classList.remove('fullscreen');
+                document.exitFullscreen();
                 isFullscreen = false;
             }
-        }
-
-        function zoomIn() {
-            zoomLevel = Math.min(zoomLevel + 0.1, 2);
-            document.getElementById('main-display').style.transform = `scale(${zoomLevel})`;
-        }
-
-        function zoomOut() {
-            zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
-            document.getElementById('main-display').style.transform = `scale(${zoomLevel})`;
         }
 
         function logout() {
@@ -383,18 +339,6 @@ async function initializeDisplay() {
             document.getElementById('main-display').classList.add('hidden');
             document.getElementById('display-login-form').reset();
         }
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F11') {
-                e.preventDefault();
-                toggleFullscreen();
-            } else if (e.key === 'Escape') {
-                if (isFullscreen) {
-                    toggleFullscreen();
-                }
-            }
-        });
     </script>
 </body>
 </html>
