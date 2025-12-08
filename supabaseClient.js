@@ -35,6 +35,28 @@ if (typeof supabase === 'undefined') {
             }
         },
 
+// أضف هذا الجزء داخل window.supabaseHelpers في قسم الاستشارات
+
+getConsultationByNumber: async function(consultationNumber) {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('consultations')
+            .select('*, doctors(name)')
+            .eq('consultation_number', consultationNumber)
+            .single();
+        
+        if (error) {
+            console.error('Error fetching consultation:', error);
+            return null;
+        }
+        return data;
+    } catch (error) {
+        console.error('Exception in getConsultationByNumber:', error);
+        return null;
+    }
+},
+
+        
         getClinicsByScreen: async function(screenNumber) {
             try {
                 const { data, error } = await window.supabaseClient
