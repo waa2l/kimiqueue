@@ -8,44 +8,25 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { 'arabic': ['Cairo', 'sans-serif'] },
-                    colors: {
-                        'primary': '#1e40af',
-                        'secondary': '#3b82f6',
-                        'success': '#10b981',
-                        'warning': '#f59e0b',
-                        'danger': '#ef4444'
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         body { font-family: 'Cairo', sans-serif; }
-        .step-indicator { transition: all 0.3s ease; }
-        .step-indicator.active { background: linear-gradient(135deg, #3b82f6, #1e40af); color: white; }
-        .step-indicator.completed { background: linear-gradient(135deg, #10b981, #059669); color: white; }
-        .form-section { display: none; }
-        .form-section.active { display: block; }
-        .medical-history-item { transition: all 0.2s ease; }
-        .medical-history-item:hover { background-color: #f3f4f6; }
-        .medical-history-item.selected { background: linear-gradient(135deg, #3b82f6, #1e40af); color: white; }
-        
         .main-tab { cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; }
         .main-tab.active { border-color: #1e40af; color: #1e40af; font-weight: bold; }
+        .consultation-card { transition: all 0.2s; }
+        .consultation-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body class="bg-gray-50 font-arabic">
+    
     <nav class="bg-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <h1 class="text-2xl font-bold text-primary">🏥 نظام إدارة الطباب</h1>
-                <div class="flex space-x-4 space-x-reverse">
+                <div class="flex items-center space-x-4 space-x-reverse">
                     <a href="index.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md">الرئيسية</a>
+                    <a href="profile.html" class="text-sm bg-primary text-white px-4 py-2 rounded-full hover:bg-secondary transition-colors">
+                        <i class="fas fa-user ml-2"></i>حسابي
+                    </a>
                 </div>
             </div>
         </div>
@@ -55,14 +36,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="py-6">
                 <h1 class="text-3xl font-bold text-gray-900">الاستشارات الطبية</h1>
-                <p class="mt-2 text-gray-600">احصل على استشارة طبية أو تابع حالة استشارتك</p>
+                <p class="mt-2 text-gray-600">اطلب استشارة طبية أو تابع سجل استشاراتك السابقة</p>
                 
                 <div class="flex mt-8 space-x-8 space-x-reverse border-b">
-                    <div onclick="switchMainTab('new')" id="tab-new" class="main-tab active pb-3 px-4">
+                    <div onclick="switchTab('new')" id="tab-new" class="main-tab active pb-3 px-4">
                         <i class="fas fa-plus-circle ml-2"></i>استشارة جديدة
                     </div>
-                    <div onclick="switchMainTab('followup')" id="tab-followup" class="main-tab pb-3 px-4 text-gray-500">
-                        <i class="fas fa-search ml-2"></i>متابعة الرد
+                    <div onclick="switchTab('history')" id="tab-history" class="main-tab pb-3 px-4 text-gray-500">
+                        <i class="fas fa-history ml-2"></i>سجل الاستشارات
                     </div>
                 </div>
             </div>
@@ -71,76 +52,22 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         
-        <div id="new-consultation-container">
-            <div id="registration-check" class="bg-white rounded-lg shadow-lg p-6 mb-8 text-center">
-                <div class="text-primary text-6xl mb-4"><i class="fas fa-user-md"></i></div>
-                <h2 class="text-2xl font-bold mb-4">طلب استشارة طبية</h2>
-                <p class="text-gray-600 mb-6">قم بتعبئة النموذج الطبي وسيتم الرد عليك من قبل الطبيب المختص</p>
-                <button onclick="showRegistrationForm()" class="bg-primary text-white px-8 py-3 rounded-lg hover:bg-secondary font-semibold">
-                    <i class="fas fa-edit ml-2"></i>بدء التسجيل
-                </button>
-            </div>
+        <div id="new-consultation-section">
+            <div class="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto">
+                <div class="border-b pb-4 mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">بيانات الاستشارة</h2>
+                    <p class="text-sm text-gray-500">سيقوم الطبيب المختص بالرد عليك في أقرب وقت</p>
+                </div>
 
-            <div id="registration-form" class="hidden">
-                <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                    <div class="flex justify-center mb-8">
-                        <div class="flex space-x-4 space-x-reverse">
-                            <div class="step-indicator active w-10 h-10 rounded-full flex items-center justify-center font-semibold" id="step-1">1</div>
-                            <div class="step-indicator w-10 h-10 rounded-full flex items-center justify-center font-semibold bg-gray-200" id="step-2">2</div>
-                            <div class="step-indicator w-10 h-10 rounded-full flex items-center justify-center font-semibold bg-gray-200" id="step-3">3</div>
+                <form id="consultation-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">اسم المريض</label>
+                            <input type="text" id="patient-name" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
                         </div>
-                    </div>
-
-                    <div class="form-section active" id="section-1">
-                        <h3 class="text-xl font-semibold mb-6">المعلومات الشخصية</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الرباعي *</label>
-                                <input type="text" id="full-name" required class="w-full px-3 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">الرقم القومي *</label>
-                                <input type="text" id="national-id" required class="w-full px-3 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف *</label>
-                                <input type="tel" id="phone-number" required class="w-full px-3 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">النوع *</label>
-                                <select id="gender" required class="w-full px-3 py-2 border rounded-lg">
-                                    <option value="">اختر النوع</option>
-                                    <option value="male">ذكر</option>
-                                    <option value="female">أنثى</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mt-8 text-center">
-                            <button onclick="nextStep(2)" class="bg-primary text-white px-8 py-3 rounded-lg">التالي</button>
-                        </div>
-                    </div>
-
-                    <div class="form-section" id="section-2">
-                        <h3 class="text-xl font-semibold mb-6">التاريخ المرضي</h3>
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-3">الأمراض المزمنة</label>
-                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                <div class="medical-history-item p-3 border rounded-lg cursor-pointer text-center" data-disease="diabetes"><div class="text-sm">سكر</div></div>
-                                <div class="medical-history-item p-3 border rounded-lg cursor-pointer text-center" data-disease="pressure"><div class="text-sm">ضغط</div></div>
-                                <div class="medical-history-item p-3 border rounded-lg cursor-pointer text-center" data-disease="heart"><div class="text-sm">قلب</div></div>
-                            </div>
-                        </div>
-                        <div class="flex justify-between mt-8">
-                            <button onclick="previousStep(1)" class="bg-gray-500 text-white px-8 py-3 rounded-lg">السابق</button>
-                            <button onclick="nextStep(3)" class="bg-primary text-white px-8 py-3 rounded-lg">التالي</button>
-                        </div>
-                    </div>
-
-                    <div class="form-section" id="section-3">
-                        <h3 class="text-xl font-semibold mb-6">تفاصيل الاستشارة</h3>
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">التخصص المطلوب *</label>
-                            <select id="specialty" required class="w-full px-3 py-2 border rounded-lg">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">التخصص المطلوب</label>
+                            <select id="specialty" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none">
                                 <option value="">اختر التخصص</option>
                                 <option value="طب الأسرة">طب الأسرة</option>
                                 <option value="الباطنية">الباطنية</option>
@@ -150,89 +77,77 @@
                                 <option value="الجلدية">الجلدية</option>
                             </select>
                         </div>
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">الشكوى الرئيسية *</label>
-                            <textarea id="complaint" required rows="4" class="w-full px-3 py-2 border rounded-lg"></textarea>
-                        </div>
-                        <div class="flex justify-between mt-8">
-                            <button onclick="previousStep(2)" class="bg-gray-500 text-white px-8 py-3 rounded-lg">السابق</button>
-                            <button onclick="submitRegistration()" class="bg-success text-white px-8 py-3 rounded-lg">إرسال الاستشارة</button>
-                        </div>
                     </div>
-                </div>
-            </div>
 
-            <div id="success-message" class="hidden bg-white rounded-lg shadow-lg p-8 text-center">
-                <div class="text-success text-6xl mb-4"><i class="fas fa-check-circle"></i></div>
-                <h2 class="text-2xl font-bold mb-4">تم إرسال الاستشارة بنجاح!</h2>
-                <p class="text-gray-600 mb-6">يرجى الاحتفاظ برقم الاستشارة لمتابعة الرد</p>
-                <div class="bg-blue-50 p-6 rounded-lg mb-6 border border-blue-100 max-w-md mx-auto">
-                    <div class="text-sm text-gray-600 mb-2">رقم الاستشارة</div>
-                    <div class="text-3xl font-bold text-primary tracking-wider" id="consultation-number"></div>
-                </div>
-                <button onclick="location.reload()" class="bg-gray-100 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-200">عودة</button>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">الشكوى / الأعراض</label>
+                        <textarea id="complaint" required rows="5" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none" placeholder="اشرح ما تشعر به بالتفصيل..."></textarea>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-secondary font-semibold shadow-md transition-all">
+                            <i class="fas fa-paper-plane ml-2"></i>إرسال الاستشارة
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div id="followup-container" class="hidden">
-            <div class="max-w-2xl mx-auto">
-                <div class="bg-white rounded-lg shadow-lg p-8 mb-6">
-                    <h3 class="text-xl font-bold mb-4 text-center">متابعة حالة الاستشارة</h3>
-                    <p class="text-gray-600 text-center mb-6">أدخل رقم الاستشارة الذي حصلت عليه عند التسجيل</p>
-                    
-                    <div class="flex space-x-3 space-x-reverse">
-                        <input type="text" id="search-consultation-input" placeholder="مثال: CON171000..." class="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-lg focus:border-primary focus:outline-none">
-                        <button onclick="searchConsultation()" class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-secondary font-semibold">
-                            <i class="fas fa-search ml-2"></i>بحث
-                        </button>
-                    </div>
-                </div>
-
-                <div id="consultation-result" class="hidden bg-white rounded-lg shadow-lg overflow-hidden">
-                    <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
-                        <span class="font-bold text-gray-700">تفاصيل الاستشارة</span>
-                        <span id="result-status-badge" class="px-3 py-1 rounded-full text-sm font-medium"></span>
-                    </div>
-                    
-                    <div class="p-6">
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div>
-                                <div class="text-xs text-gray-500">المريض</div>
-                                <div class="font-semibold" id="result-patient"></div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-gray-500">التخصص</div>
-                                <div class="font-semibold" id="result-specialty"></div>
-                            </div>
-                            <div class="col-span-2">
-                                <div class="text-xs text-gray-500">الشكوى</div>
-                                <p class="text-gray-800 bg-gray-50 p-3 rounded mt-1" id="result-complaint"></p>
-                            </div>
-                        </div>
-
-                        <div id="response-section" class="border-t pt-6 hidden">
-                            <div class="flex items-center mb-4">
-                                <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center ml-3">
-                                    <i class="fas fa-user-md"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-gray-800" id="result-doctor-name"></div>
-                                    <div class="text-xs text-gray-500">الطبيب المعالج</div>
-                                </div>
-                            </div>
-                            <div class="bg-green-50 border border-green-100 rounded-lg p-4">
-                                <h4 class="font-semibold text-green-800 mb-2">الرد الطبي:</h4>
-                                <p class="text-gray-700 whitespace-pre-line" id="result-response"></p>
-                            </div>
-                        </div>
-
-                        <div id="pending-section" class="text-center py-6 hidden">
-                            <i class="fas fa-clock text-4xl text-warning mb-3"></i>
-                            <h3 class="text-lg font-bold text-gray-700">الاستشارة قيد المراجعة</h3>
-                            <p class="text-gray-500">لم يتم الرد من الطبيب بعد، يرجى المحاولة لاحقاً</p>
+        <div id="history-section" class="hidden">
+            
+            <div id="guest-view" class="hidden text-center py-12 bg-white rounded-lg shadow-lg">
+                <div class="text-6xl text-gray-300 mb-4"><i class="fas fa-lock"></i></div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">سجل الاستشارات متاح للأعضاء</h3>
+                <p class="text-gray-600 mb-6">يرجى تسجيل الدخول لمشاهدة جميع استشاراتك وردود الأطباء</p>
+                <div class="space-x-4 space-x-reverse">
+                    <button onclick="window.supabaseHelpers.signInWithGoogle()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary">
+                        <i class="fab fa-google ml-2"></i>تسجيل الدخول
+                    </button>
+                    <div class="mt-8 pt-8 border-t max-w-md mx-auto">
+                        <p class="text-sm text-gray-500 mb-3">أو ابحث برقم الاستشارة (للضيوف)</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="search-number" placeholder="رقم الاستشارة (مثال: CON123456)" class="flex-1 px-4 py-2 border rounded-lg">
+                            <button onclick="searchByNumber()" class="bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200">بحث</button>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div id="user-view" class="hidden max-w-4xl mx-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">سجل استشاراتي</h2>
+                    <span id="user-welcome" class="text-sm text-gray-500"></span>
+                </div>
+                
+                <div id="consultations-list" class="space-y-4">
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-spinner fa-spin ml-2"></i>جاري التحميل...
+                    </div>
+                </div>
+            </div>
+
+            <div id="result-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 max-w-lg w-full mx-4 shadow-2xl">
+                    <div class="flex justify-between items-center mb-4 border-b pb-2">
+                        <h3 class="text-lg font-bold">تفاصيل الاستشارة</h3>
+                        <button onclick="document.getElementById('result-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">✕</button>
+                    </div>
+                    <div id="result-content"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+                <div class="text-success text-6xl mb-4"><i class="fas fa-check-circle"></i></div>
+                <h3 class="text-2xl font-bold mb-4">تم الإرسال بنجاح!</h3>
+                <p class="text-gray-600 mb-6">تم حفظ استشارتك بنجاح</p>
+                <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100">
+                    <div class="text-sm text-gray-600 mb-1">رقم الاستشارة</div>
+                    <div class="text-3xl font-bold text-primary tracking-wider" id="new-consultation-number">---</div>
+                </div>
+                <button onclick="location.reload()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary">حسناً</button>
             </div>
         </div>
 
@@ -240,170 +155,187 @@
 
     <script src="supabaseClient.js"></script>
     <script>
-        let currentStep = 1;
-        let selectedDiseases = [];
-
-        function checkSupabaseReady() {
-            return new Promise((resolve) => {
+        // Supabase Ready Check
+        function checkReady() {
+            return new Promise(resolve => {
                 if (window.supabaseHelpers) resolve();
-                else setTimeout(() => checkSupabaseReady().then(resolve), 100);
+                else setTimeout(() => checkReady().then(resolve), 100);
             });
         }
 
-        // --- Navigation Logic ---
-        function switchMainTab(tab) {
+        // --- Tabs Logic ---
+        function switchTab(tabName) {
+            // Update UI
             document.querySelectorAll('.main-tab').forEach(el => {
                 el.classList.remove('active', 'text-gray-500');
                 el.classList.add('text-gray-500');
             });
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            document.getElementById(`tab-${tab}`).classList.remove('text-gray-500');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.remove('text-gray-500');
 
-            if (tab === 'new') {
-                document.getElementById('new-consultation-container').classList.remove('hidden');
-                document.getElementById('followup-container').classList.add('hidden');
+            // Show Sections
+            if (tabName === 'new') {
+                document.getElementById('new-consultation-section').classList.remove('hidden');
+                document.getElementById('history-section').classList.add('hidden');
             } else {
-                document.getElementById('new-consultation-container').classList.add('hidden');
-                document.getElementById('followup-container').classList.remove('hidden');
+                document.getElementById('new-consultation-section').classList.add('hidden');
+                document.getElementById('history-section').classList.remove('hidden');
+                loadHistory(); // Load data when tab is opened
             }
         }
 
-        // --- Registration Logic ---
-        function showRegistrationForm() {
-            document.getElementById('registration-check').classList.add('hidden');
-            document.getElementById('registration-form').classList.remove('hidden');
-        }
+        // --- New Consultation Logic ---
+        document.getElementById('consultation-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i>جاري الإرسال...';
 
-        function nextStep(step) {
-            if(validateCurrentStep()) {
-                document.getElementById(`section-${currentStep}`).classList.remove('active');
-                document.getElementById(`step-${currentStep}`).classList.remove('active');
-                document.getElementById(`step-${currentStep}`).classList.add('completed');
-                currentStep = step;
-                document.getElementById(`section-${currentStep}`).classList.add('active');
-                document.getElementById(`step-${currentStep}`).classList.add('active');
-            }
-        }
+            await checkReady();
 
-        function previousStep(step) {
-            document.getElementById(`section-${currentStep}`).classList.remove('active');
-            document.getElementById(`step-${currentStep}`).classList.remove('active');
-            currentStep = step;
-            document.getElementById(`section-${currentStep}`).classList.add('active');
-            document.getElementById(`step-${currentStep}`).classList.remove('completed');
-            document.getElementById(`step-${currentStep}`).classList.add('active');
-        }
-
-        function validateCurrentStep() {
-            // Simplified validation for brevity
-            if (currentStep === 1) {
-                if (!document.getElementById('full-name').value || !document.getElementById('phone-number').value) {
-                    alert('يرجى ملء البيانات الإلزامية');
-                    return false;
-                }
-            } else if (currentStep === 3) {
-                if (!document.getElementById('specialty').value || !document.getElementById('complaint').value) {
-                    alert('يرجى اختيار التخصص وكتابة الشكوى');
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        // Toggle diseases selection
-        document.querySelectorAll('.medical-history-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const disease = this.dataset.disease;
-                if (this.classList.contains('selected')) {
-                    this.classList.remove('selected');
-                    selectedDiseases = selectedDiseases.filter(d => d !== disease);
-                } else {
-                    this.classList.add('selected');
-                    selectedDiseases.push(disease);
-                }
-            });
-        });
-
-        async function submitRegistration() {
-            if (!validateCurrentStep()) return;
-            await checkSupabaseReady();
-            
+            // تجهيز البيانات لتناسب الجدول
             const consultationData = {
-                patient_name: document.getElementById('full-name').value,
-                national_id: document.getElementById('national-id').value,
-                phone: document.getElementById('phone-number').value,
-                gender: document.getElementById('gender').value,
-                chronic_diseases: selectedDiseases,
+                patient_name: document.getElementById('patient-name').value,
                 specialty: document.getElementById('specialty').value,
                 complaint: document.getElementById('complaint').value,
-                consultation_number: `CON${Math.floor(Math.random() * 100000) + 100000}`, // Simple random ID
-                status: 'pending'
+                
+                // System Fields (Automatic)
+                consultation_number: `CON${Math.floor(Math.random() * 100000) + 100000}`,
+                status: 'pending',
+                // doctor_id: null (default in db)
+                // doctor_response: null (default in db)
+                // user_id: will be added by supabaseHelpers.addConsultation if logged in
             };
-            
+
             const result = await window.supabaseHelpers.addConsultation(consultationData);
-            
+
             if (result) {
-                document.getElementById('consultation-number').textContent = consultationData.consultation_number;
-                document.getElementById('registration-form').classList.add('hidden');
-                document.getElementById('success-message').classList.remove('hidden');
+                document.getElementById('new-consultation-number').textContent = consultationData.consultation_number;
+                document.getElementById('success-modal').classList.remove('hidden');
+                document.getElementById('success-modal').classList.add('flex');
             } else {
-                alert('حدث خطأ أثناء الإرسال');
+                alert('حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane ml-2"></i>إرسال الاستشارة';
+            }
+        });
+
+        // --- History Logic ---
+        async function loadHistory() {
+            await checkReady();
+            const user = await window.supabaseHelpers.getCurrentUser();
+
+            if (user) {
+                // Logged In
+                document.getElementById('guest-view').classList.add('hidden');
+                document.getElementById('user-view').classList.remove('hidden');
+                document.getElementById('user-welcome').textContent = user.email;
+
+                const consultations = await window.supabaseHelpers.getMyConsultations(user.id);
+                renderConsultationsList(consultations);
+            } else {
+                // Guest
+                document.getElementById('guest-view').classList.remove('hidden');
+                document.getElementById('user-view').classList.add('hidden');
             }
         }
 
-        // --- Follow Up Logic (New) ---
-        async function searchConsultation() {
-            const input = document.getElementById('search-consultation-input');
-            const consultationNumber = input.value.trim();
-            
-            if (!consultationNumber) {
-                alert('الرجاء إدخال رقم الاستشارة');
+        function renderConsultationsList(data) {
+            const container = document.getElementById('consultations-list');
+            container.innerHTML = '';
+
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 bg-white rounded-lg border border-dashed border-gray-300">
+                        <i class="fas fa-file-medical-alt text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">لا توجد استشارات سابقة</p>
+                    </div>
+                `;
                 return;
             }
 
-            // UI Loading state
-            input.disabled = true;
-            document.body.style.cursor = 'wait';
+            data.forEach(item => {
+                const isReplied = item.status === 'completed';
+                const statusBadge = isReplied 
+                    ? `<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">تم الرد</span>`
+                    : `<span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">قيد الانتظار</span>`;
 
-            await checkSupabaseReady();
-            
-            // Note: This function needs to be added to supabaseClient.js as discussed
-            const result = await window.supabaseHelpers.getConsultationByNumber(consultationNumber);
-            
-            input.disabled = false;
-            document.body.style.cursor = 'default';
+                const card = document.createElement('div');
+                card.className = 'consultation-card bg-white p-5 rounded-lg border border-gray-200 shadow-sm';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="text-xs text-gray-400">#${item.consultation_number}</span>
+                            <h4 class="font-bold text-gray-800 text-lg">${item.specialty}</h4>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    
+                    <div class="bg-gray-50 p-3 rounded text-gray-700 text-sm mb-3">
+                        <span class="font-semibold block mb-1">الشكوى:</span>
+                        ${item.complaint}
+                    </div>
 
-            if (!result) {
-                alert('رقم الاستشارة غير صحيح أو غير موجود');
-                document.getElementById('consultation-result').classList.add('hidden');
-                return;
-            }
+                    ${isReplied ? `
+                        <div class="mt-4 border-t pt-3">
+                            <div class="flex items-center text-green-700 font-bold mb-2">
+                                <i class="fas fa-user-md ml-2"></i>
+                                رد الطبيب (${item.doctors?.name || 'طبيب المركز'}):
+                            </div>
+                            <p class="text-gray-800 text-sm leading-relaxed bg-green-50 p-3 rounded border border-green-100">
+                                ${item.doctor_response}
+                            </p>
+                        </div>
+                    ` : `
+                        <div class="text-xs text-gray-400 mt-2 flex items-center">
+                            <i class="far fa-clock ml-1"></i>
+                            ${new Date(item.created_at).toLocaleDateString('ar-EG')}
+                        </div>
+                    `}
+                `;
+                container.appendChild(card);
+            });
+        }
 
-            // Fill Data
-            document.getElementById('consultation-result').classList.remove('hidden');
-            document.getElementById('result-patient').textContent = result.patient_name;
-            document.getElementById('result-specialty').textContent = result.specialty;
-            document.getElementById('result-complaint').textContent = result.complaint;
-            
-            const statusBadge = document.getElementById('result-status-badge');
-            const pendingSection = document.getElementById('pending-section');
-            const responseSection = document.getElementById('response-section');
+        // --- Guest Search Logic ---
+        async function searchByNumber() {
+            const num = document.getElementById('search-number').value.trim();
+            if (!num) return alert('الرجاء إدخال رقم الاستشارة');
 
-            if (result.status === 'completed') {
-                statusBadge.textContent = 'تم الرد';
-                statusBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800';
-                
-                pendingSection.classList.add('hidden');
-                responseSection.classList.remove('hidden');
-                
-                document.getElementById('result-doctor-name').textContent = result.doctors?.name || 'طبيب المركز';
-                document.getElementById('result-response').textContent = result.doctor_response;
+            await checkReady();
+            const result = await window.supabaseHelpers.getConsultationByNumber(num);
+
+            if (result) {
+                const isReplied = result.status === 'completed';
+                const html = `
+                    <div class="space-y-4">
+                        <div class="flex justify-between border-b pb-2">
+                            <span class="font-bold">الحالة:</span>
+                            <span class="${isReplied ? 'text-green-600' : 'text-yellow-600'} font-bold">
+                                ${isReplied ? 'تم الرد' : 'قيد المراجعة'}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="block text-gray-500 text-sm">المريض:</span>
+                            <span class="font-medium">${result.patient_name}</span>
+                        </div>
+                        <div>
+                            <span class="block text-gray-500 text-sm">الشكوى:</span>
+                            <p class="bg-gray-50 p-2 rounded text-sm">${result.complaint}</p>
+                        </div>
+                        ${isReplied ? `
+                            <div class="bg-green-50 p-3 rounded border border-green-200">
+                                <span class="block text-green-700 font-bold text-sm mb-1">رد الطبيب:</span>
+                                <p class="text-gray-800">${result.doctor_response}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                document.getElementById('result-content').innerHTML = html;
+                document.getElementById('result-modal').classList.remove('hidden');
+                document.getElementById('result-modal').classList.add('flex');
             } else {
-                statusBadge.textContent = 'قيد الانتظار';
-                statusBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800';
-                
-                pendingSection.classList.remove('hidden');
-                responseSection.classList.add('hidden');
+                alert('لم يتم العثور على استشارة بهذا الرقم');
             }
         }
     </script>
