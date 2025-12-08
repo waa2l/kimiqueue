@@ -1,4 +1,4 @@
-// supabaseClient.js - النسخة المحدثة (شاملة الاستشارات والمواعيد)
+// supabaseClient.js - النسخة الكاملة والنهائية (Google Auth + User Profile)
 const SUPABASE_URL = 'https://dkvefbjgsnhrkjpwprux.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrdmVmYmpnc25ocmtqcHdwcnV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTQ5MDksImV4cCI6MjA4MDYzMDkwOX0.fZxEFQc9iUtqX6XEtuuy_XfRIMp9oR3RKmJ84rUzyGw';
 
@@ -14,6 +14,52 @@ if (typeof supabase === 'undefined') {
 
     // إنشاء دوال المساعدة
     window.supabaseHelpers = {
+        
+        // ==================== AUTHENTICATION (تسجيل الدخول) ====================
+        signInWithGoogle: async function() {
+            const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: window.location.href // العودة لنفس الصفحة بعد الدخول
+                }
+            });
+            if (error) console.error('Login Error:', error);
+            return data;
+        },
+
+        signOut: async function() {
+            const { error } = await window.supabaseClient.auth.signOut();
+            if (!error) window.location.reload();
+        },
+
+        getCurrentUser: async function() {
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            return user;
+        },
+
+        // ==================== بيانات المستخدم (MY PROFILE) ====================
+        getMyConsultations: async function(userId) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('consultations')
+                    .select('*, doctors(name)')
+                    .eq('user_id', userId)
+                    .order('created_at', { ascending: false });
+                return error ? [] : data;
+            } catch (error) { return []; }
+        },
+
+        getMyAppointments: async function(userId) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('appointments')
+                    .select('*, clinics(name), doctors(name)')
+                    .eq('user_id', userId)
+                    .order('appointment_date', { ascending: false });
+                return error ? [] : data;
+            } catch (error) { return []; }
+        },
+
         // ==================== العيادات (CLINICS) ====================
         getClinics: async function() {
             try {
@@ -35,28 +81,6 @@ if (typeof supabase === 'undefined') {
             }
         },
 
-// أضف هذا الجزء داخل window.supabaseHelpers في قسم الاستشارات
-
-getConsultationByNumber: async function(consultationNumber) {
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('consultations')
-            .select('*, doctors(name)')
-            .eq('consultation_number', consultationNumber)
-            .single();
-        
-        if (error) {
-            console.error('Error fetching consultation:', error);
-            return null;
-        }
-        return data;
-    } catch (error) {
-        console.error('Exception in getConsultationByNumber:', error);
-        return null;
-    }
-},
-
-        
         getClinicsByScreen: async function(screenNumber) {
             try {
                 const { data, error } = await window.supabaseClient
@@ -218,6 +242,10 @@ getConsultationByNumber: async function(consultationNumber) {
 
         addAppointment: async function(appointmentData) {
             try {
+                // محاولة ربط الموعد بحساب المستخدم إذا كان مسجلاً للدخول
+                const { data: { user } } = await window.supabaseClient.auth.getUser();
+                if (user) appointmentData.user_id = user.id;
+
                 const { data, error } = await window.supabaseClient
                     .from('appointments')
                     .insert([appointmentData])
@@ -231,10 +259,32 @@ getConsultationByNumber: async function(consultationNumber) {
             }
         },
 
-        // ==================== الاستشارات (CONSULTATIONS) - (تمت الإضافة) ====================
-        // هذه الدالة هي التي تحتاجها صفحة consultations.html
+        // ==================== الاستشارات (CONSULTATIONS) ====================
+        getConsultationByNumber: async function(consultationNumber) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('consultations')
+                    .select('*, doctors(name)')
+                    .eq('consultation_number', consultationNumber)
+                    .single();
+                
+                if (error) {
+                    console.error('Error fetching consultation:', error);
+                    return null;
+                }
+                return data;
+            } catch (error) {
+                console.error('Exception in getConsultationByNumber:', error);
+                return null;
+            }
+        },
+
         addConsultation: async function(consultationData) {
             try {
+                // محاولة ربط الاستشارة بحساب المستخدم إذا كان مسجلاً للدخول
+                const { data: { user } } = await window.supabaseClient.auth.getUser();
+                if (user) consultationData.user_id = user.id;
+
                 const { data, error } = await window.supabaseClient
                     .from('consultations')
                     .insert([consultationData])
