@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مقياس القلق العام</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Cairo', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 font-arabic">
+    <div class="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-lg mb-10">
+        <div class="flex items-center mb-6 border-b pb-4">
+            <a href="index.html" class="text-gray-500 hover:text-purple-600 ml-4"><i class="fas fa-arrow-right"></i></a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">مقياس القلق العام (GAD-7)</h1>
+                <p class="text-sm text-gray-500">خلال الأسبوعين الماضيين، كم مرة عانيت من المشاكل التالية؟</p>
+            </div>
+        </div>
+
+        <form id="gad7-form" class="space-y-6">
+            </form>
+
+        <button onclick="calculateGAD7()" class="w-full mt-8 bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700 transition">عرض النتيجة</button>
+
+        <div id="result" class="hidden mt-6 bg-purple-50 p-6 rounded-lg border border-purple-100 text-center">
+            <p class="text-gray-600">النتيجة النهائية</p>
+            <div id="score-value" class="text-4xl font-bold text-purple-700 my-2">0</div>
+            <div id="score-text" class="text-xl font-semibold mb-2"></div>
+            <p class="text-sm text-gray-500">ملاحظة: هذه النتيجة استرشادية ولا تغني عن زيارة الطبيب</p>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            "الشعور بالعصبية أو القلق أو التوتر",
+            "عدم القدرة على وقف القلق أو السيطرة عليه",
+            "القلق المفرط بشأن أشياء مختلفة",
+            "صعوبة في الاسترخاء",
+            "الشعور بعدم الاستقرار لدرجة صعوبة الجلوس",
+            "سهولة الانزعاج أو التهيج",
+            "الشعور بالخوف وكأن شيئاً فظيعاً سيحدث"
+        ];
+
+        const options = [
+            { val: 0, text: "أبداً" },
+            { val: 1, text: "عدة أيام" },
+            { val: 2, text: "أكثر من نصف الأيام" },
+            { val: 3, text: "يومياً تقريباً" }
+        ];
+
+        const form = document.getElementById('gad7-form');
+        
+        questions.forEach((q, index) => {
+            const div = document.createElement('div');
+            div.className = "bg-gray-50 p-4 rounded-lg";
+            let optionsHTML = '';
+            
+            options.forEach(opt => {
+                optionsHTML += `
+                    <label class="flex items-center space-x-2 space-x-reverse cursor-pointer mt-2">
+                        <input type="radio" name="q${index}" value="${opt.val}" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
+                        <span class="mr-2">${opt.text}</span>
+                    </label>
+                `;
+            });
+
+            div.innerHTML = `
+                <p class="font-bold text-gray-700 mb-2">${index + 1}. ${q}</p>
+                <div class="space-y-1">${optionsHTML}</div>
+            `;
+            form.appendChild(div);
+        });
+
+        function calculateGAD7() {
+            let total = 0;
+            let answered = 0;
+            
+            for(let i=0; i<questions.length; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if(selected) {
+                    total += parseInt(selected.value);
+                    answered++;
+                }
+            }
+
+            if(answered < questions.length) {
+                alert('يرجى الإجابة على جميع الأسئلة');
+                return;
+            }
+
+            const resultDiv = document.getElementById('result');
+            const scoreDiv = document.getElementById('score-value');
+            const textDiv = document.getElementById('score-text');
+
+            let severity = '';
+            if(total <= 4) severity = 'قلق بسيط جداً أو معدوم';
+            else if(total <= 9) severity = 'قلق خفيف';
+            else if(total <= 14) severity = 'قلق متوسط';
+            else severity = 'قلق شديد';
+
+            scoreDiv.textContent = total;
+            textDiv.textContent = severity;
+            resultDiv.classList.remove('hidden');
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
