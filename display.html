@@ -66,7 +66,6 @@
     </style>
 </head>
 <body class="font-arabic">
-    <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
             <div class="text-center mb-6">
@@ -95,9 +94,7 @@
         </div>
     </div>
 
-    <!-- Main Display -->
     <div id="main-display" class="hidden h-screen flex flex-col">
-        <!-- Header -->
         <div class="bg-white shadow-lg px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-4 space-x-reverse">
                 <h1 id="center-name" class="text-2xl font-bold text-primary">المركز الطبي الحديث</h1>
@@ -121,12 +118,9 @@
             </div>
         </div>
 
-        <!-- Notification Area -->
         <div id="notification-area" class="absolute top-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4"></div>
 
-        <!-- Main Content -->
         <div class="flex-1 flex overflow-hidden">
-            <!-- Video Player -->
             <div class="w-1/3 bg-black relative">
                 <div class="video-container h-full flex items-center justify-center">
                     <div class="text-white text-center">
@@ -136,10 +130,9 @@
                 </div>
             </div>
 
-            <!-- Clinic Cards -->
-            <div class="flex-1 p-6 bg-gray-100">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full" id="clinics-container">
-                    <div class="col-span-full flex items-center justify-center">
+            <div class="flex-1 p-6 bg-gray-100 relative">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full content-start" id="clinics-container">
+                    <div class="col-span-full flex items-center justify-center h-64">
                         <div class="text-center">
                             <i class="fas fa-spinner fa-spin text-4xl text-primary mb-4"></i>
                             <p class="text-gray-600">جاري التحميل...</p>
@@ -148,7 +141,6 @@
                 </div>
             </div>
 
-            <!-- Right Panel -->
             <div class="w-1/4 bg-white p-4 flex flex-col space-y-4">
                 <div class="bg-gray-50 p-4 rounded-lg text-center">
                     <h3 class="text-lg font-semibold mb-2">متابعة عبر الهاتف</h3>
@@ -159,16 +151,18 @@
                         <p class="text-sm text-gray-600 mt-2">امسح QR Code</p>
                     </div>
                 </div>
-                <div class="bg-gray-50 p-4 rounded-lg flex-1">
+                <div class="bg-gray-50 p-4 rounded-lg flex-1 flex flex-col">
                     <h3 class="text-lg font-semibold mb-2">أطباؤنا</h3>
-                    <div id="doctor-carousel" class="h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-user-md text-6xl text-gray-400"></i>
+                    <div id="doctor-carousel" class="flex-1 bg-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
+                        <div class="text-center text-gray-500">
+                            <i class="fas fa-user-md text-6xl"></i>
+                            <p class="mt-2">جاري تحميل الأطباء...</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Ticker -->
         <div class="bg-primary text-white py-3 overflow-hidden">
             <div class="ticker whitespace-nowrap text-lg font-semibold" id="ticker-content">
                 مرحباً بكم في المركز الطبي الحديث
@@ -181,6 +175,7 @@
         let currentScreen = 1;
         let isFullscreen = false;
         let clinics = [];
+        let doctors = [];
 
         // Wait for supabaseHelpers to be available
         function checkSupabaseReady() {
@@ -199,6 +194,7 @@
             const screenNumber = document.getElementById('screen-number').value;
             const password = document.getElementById('screen-password').value;
             
+            // كلمة مرور الشاشة (محلية)
             if (password === 'display123') {
                 currentScreen = parseInt(screenNumber);
                 document.getElementById('current-screen').textContent = currentScreen;
@@ -218,24 +214,38 @@
             try {
                 await loadClinics();
                 await loadSettings();
+                await loadDoctorsForCarousel();
                 updateTime();
-                startDoctorCarousel();
                 
                 // Subscribe to real-time updates
                 if (window.supabaseHelpers && window.supabaseHelpers.subscribeToClinicUpdates) {
                     window.supabaseHelpers.subscribeToClinicUpdates((updatedClinic) => {
                         console.log('📢 Update received:', updatedClinic);
+                        
+                        // التحديث في المصفوفة المحلية
                         const index = clinics.findIndex(c => c.id === updatedClinic.id);
                         if (index !== -1) {
+                            // دمج البيانات الجديدة مع القديمة
                             clinics[index] = { 
                                 ...clinics[index], 
                                 ...updatedClinic,
+                                // التأكد من وجود الحقل current
+                                current: updatedClinic.current_number !== undefined ? updatedClinic.current_number : (updatedClinic.current || clinics[index].current),
                                 lastCall: new Date().toLocaleTimeString('ar-EG')
                             };
                             
-                            playAnnouncement(updatedClinic.current, clinics[index].name);
-                            showNotification(`الآن الدور رقم ${updatedClinic.current} في ${clinics[index].name}`);
+                            // تشغيل الصوت والتنبيه إذا تغير الرقم
+                            if (updatedClinic.current_number && updatedClinic.current_number !== clinics[index].current) {
+                                playAnnouncement(updatedClinic.current_number, clinics[index].name);
+                                showNotification(`الآن الدور رقم ${updatedClinic.current_number} في ${clinics[index].name}`);
+                            }
+                            
                             populateClinics();
+                        } else {
+                            // إذا كانت عيادة جديدة تمت إضافتها لنفس الشاشة
+                            if(updatedClinic.screen === currentScreen) {
+                                loadClinics(); // إعادة تحميل الكل
+                            }
                         }
                     });
                 }
@@ -247,8 +257,8 @@
                     <div class="col-span-full flex items-center justify-center">
                         <div class="text-center text-red-600">
                             <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
-                            <p>حدث خطأ في التحميل</p>
-                            <p class="text-sm mt-2">${error.message}</p>
+                            <p>حدث خطأ في الاتصال بقاعدة البيانات</p>
+                            <p class="text-sm mt-2 text-white/80">${error.message || 'تأكد من إعدادات الأمان (RLS)'}</p>
                         </div>
                     </div>
                 `;
@@ -258,33 +268,29 @@
         async function loadClinics() {
             console.log('📥 Loading clinics for screen:', currentScreen);
             
-            if (!window.supabaseHelpers) {
-                console.error('❌ supabaseHelpers not available');
-                return;
-            }
+            if (!window.supabaseHelpers) return;
 
             try {
+                // استخدام الدالة المحدثة في supabaseClient
                 clinics = await window.supabaseHelpers.getClinicsByScreen(currentScreen);
                 console.log('✅ Clinics loaded:', clinics);
                 populateClinics();
             } catch (error) {
                 console.error('Error loading clinics:', error);
-                clinics = [];
             }
         }
 
         async function loadSettings() {
             if (!window.supabaseHelpers) return;
-            
             try {
                 const settings = await window.supabaseHelpers.getSettings();
                 if (settings) {
                     document.getElementById('center-name').textContent = settings.center_name || 'المركز الطبي الحديث';
-                    document.getElementById('ticker-content').textContent = settings.ticker_content || 'مرحباً بكم';
+                    if (settings.ticker_content) {
+                        document.getElementById('ticker-content').textContent = settings.ticker_content;
+                    }
                 }
-            } catch (error) {
-                console.error('Error loading settings:', error);
-            }
+            } catch (error) { console.error('Error settings', error); }
         }
 
         function populateClinics() {
@@ -293,10 +299,10 @@
             
             if (!clinics || clinics.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-full flex items-center justify-center">
+                    <div class="col-span-full flex items-center justify-center h-64">
                         <div class="text-center text-gray-600">
                             <i class="fas fa-inbox text-4xl mb-4"></i>
-                            <p>لا توجد عيادات لهذه الشاشة</p>
+                            <p>لا توجد عيادات مخصصة للشاشة رقم ${currentScreen}</p>
                         </div>
                     </div>
                 `;
@@ -304,25 +310,71 @@
             }
             
             clinics.forEach(clinic => {
+                // التأكد من وجود القيمة، إذا كانت غير موجودة نضع 0
+                const currentNumber = clinic.current !== undefined ? clinic.current : (clinic.current_number || 0);
+                const isActive = clinic.status === 'active';
+                
                 const card = document.createElement('div');
-                card.className = `clinic-card ${clinic.status} bg-white p-6 rounded-lg shadow-lg text-center`;
+                card.className = `clinic-card ${clinic.status} bg-white p-6 rounded-lg shadow-lg text-center transform transition-all duration-500`;
                 
                 card.innerHTML = `
-                    <div class="text-4xl mb-3">
+                    <div class="text-4xl mb-3 opacity-80">
                         <i class="fas fa-user-md"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">${clinic.name}</h3>
-                    <div class="text-5xl font-bold mb-2 ${clinic.status === 'active' ? 'pulse-glow' : ''}">${clinic.current || 0}</div>
-                    <p class="text-sm opacity-75">آخر نداء: ${clinic.lastCall}</p>
-                    <div class="mt-2">
-                        <span class="text-xs px-2 py-1 rounded ${clinic.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                            ${clinic.status === 'active' ? 'نشطة' : 'متوقفة'}
+                    <h3 class="text-2xl font-bold mb-4">${clinic.name}</h3>
+                    <div class="text-6xl font-bold mb-4 font-mono ${isActive ? 'pulse-glow' : ''}">
+                        ${currentNumber}
+                    </div>
+                    <div class="text-sm opacity-75 bg-black/10 rounded px-2 py-1 inline-block">
+                        <i class="far fa-clock ml-1"></i>
+                        آخر نداء: ${clinic.lastCall || '-'}
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-xs px-3 py-1 rounded-full font-bold ${isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${isActive ? 'مفتوحة' : 'مغلقة'}
                         </span>
                     </div>
                 `;
                 
                 container.appendChild(card);
             });
+        }
+
+        async function loadDoctorsForCarousel() {
+            if (!window.supabaseHelpers) return;
+            try {
+                const docs = await window.supabaseHelpers.getDoctors();
+                doctors = docs.filter(d => d.status === 'active'); // عرض الأطباء النشطين فقط
+                startDoctorCarousel();
+            } catch (e) { console.error(e); }
+        }
+
+        function startDoctorCarousel() {
+            if(doctors.length === 0) {
+                document.getElementById('doctor-carousel').innerHTML = '<p class="text-gray-500">لا يوجد أطباء متاحين</p>';
+                return;
+            }
+
+            let currentImage = 0;
+            const carousel = document.getElementById('doctor-carousel');
+            
+            const updateCarousel = () => {
+                const doc = doctors[currentImage];
+                carousel.innerHTML = `
+                    <div class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex flex-col items-center justify-center text-white p-4 animate-fade-in">
+                        <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-2">
+                            <i class="fas fa-user-md text-4xl"></i>
+                        </div>
+                        <div class="font-bold text-lg">${doc.name}</div>
+                        <div class="text-sm opacity-90">${doc.specialty}</div>
+                        <div class="text-xs mt-1 bg-white/20 px-2 py-1 rounded">${doc.clinic || 'العيادة العامة'}</div>
+                    </div>
+                `;
+                currentImage = (currentImage + 1) % doctors.length;
+            };
+
+            updateCarousel(); // First run
+            setInterval(updateCarousel, 5000); // Change every 5 seconds
         }
 
         function updateTime() {
@@ -332,61 +384,49 @@
                 minute: '2-digit',
                 second: '2-digit'
             });
-            const dateString = now.toLocaleDateString('ar-EG');
+            const dateString = now.toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
             const timeElement = document.getElementById('current-time');
             if (timeElement) {
-                timeElement.textContent = `${dateString} ${timeString}`;
+                timeElement.innerHTML = `<div class="text-sm opacity-75">${dateString}</div><div class="font-mono text-xl">${timeString}</div>`;
             }
-        }
-
-        function startDoctorCarousel() {
-            let currentImage = 0;
-            const carousel = document.getElementById('doctor-carousel');
-            const doctors = ['أحمد', 'فاطمة', 'خالد', 'ليلى'];
-            const specialties = ['طب أسرة', 'باطنية', 'أطفال', 'نساء'];
-            
-            setInterval(() => {
-                if (carousel) {
-                    carousel.innerHTML = `
-                        <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
-                            <div class="text-center text-white">
-                                <i class="fas fa-user-md text-4xl mb-2"></i>
-                                <div class="text-sm">د. ${doctors[currentImage]}</div>
-                                <div class="text-xs opacity-75">${specialties[currentImage]}</div>
-                            </div>
-                        </div>
-                    `;
-                    currentImage = (currentImage + 1) % 4;
-                }
-            }, 5000);
         }
 
         function showNotification(message) {
             const notificationArea = document.getElementById('notification-area');
             const notification = document.createElement('div');
-            notification.className = 'notification bg-white border-l-4 border-primary p-4 rounded-lg shadow-lg mb-2';
+            notification.className = 'notification bg-white border-r-4 border-primary p-4 rounded-lg shadow-2xl mb-3 flex items-center';
             notification.innerHTML = `
-                <div class="flex items-center">
-                    <i class="fas fa-bullhorn text-primary text-xl ml-3"></i>
-                    <div>
-                        <div class="font-semibold text-gray-900">تنبيه</div>
-                        <div class="text-gray-600">${message}</div>
-                    </div>
+                <div class="bg-primary/10 w-10 h-10 rounded-full flex items-center justify-center ml-3 text-primary">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-gray-900 text-lg">نداء آلي</div>
+                    <div class="text-gray-600">${message}</div>
                 </div>
             `;
             
             notificationArea.appendChild(notification);
             
+            // تشغيل صوت تنبيه (Ding)
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.play().catch(e => console.log('Audio autoplay blocked'));
+
             setTimeout(() => {
-                notification.remove();
-            }, 5000);
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500);
+            }, 8000);
         }
 
         function playAnnouncement(number, clinicName) {
             if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(`على العميل رقم ${number} التوجه إلى ${clinicName}`);
+                // إلغاء أي نطق سابق لتجنب التداخل
+                speechSynthesis.cancel();
+                
+                const text = `العميل رقم ${number}.. التوجه إلى ${clinicName}`;
+                const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'ar-SA';
-                utterance.rate = 0.8;
+                utterance.rate = 0.9;
                 speechSynthesis.speak(utterance);
             }
         }
@@ -394,7 +434,9 @@
         function toggleFullscreen() {
             const element = document.getElementById('main-display');
             if (!document.fullscreenElement) {
-                element.requestFullscreen();
+                element.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
                 isFullscreen = true;
             } else {
                 document.exitFullscreen();
@@ -407,9 +449,6 @@
             document.getElementById('main-display').classList.add('hidden');
             document.getElementById('display-login-form').reset();
         }
-
-        // Initialize on page load
-        console.log('✅ Display script loaded');
     </script>
 </body>
 </html>
