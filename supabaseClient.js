@@ -1,4 +1,4 @@
-// supabaseClient.js - النسخة المحدثة والكاملة
+// supabaseClient.js - النسخة المحدثة (شاملة الاستشارات والمواعيد)
 const SUPABASE_URL = 'https://dkvefbjgsnhrkjpwprux.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrdmVmYmpnc25ocmtqcHdwcnV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTQ5MDksImV4cCI6MjA4MDYzMDkwOX0.fZxEFQc9iUtqX6XEtuuy_XfRIMp9oR3RKmJ84rUzyGw';
 
@@ -22,10 +22,7 @@ if (typeof supabase === 'undefined') {
                     .select('*')
                     .order('id', { ascending: true });
                 
-                if (error) { 
-                    console.error('Error fetching clinics:', error); 
-                    return []; 
-                }
+                if (error) { console.error('Error fetching clinics:', error); return []; }
                 
                 return data.map(c => ({
                     ...c,
@@ -46,10 +43,7 @@ if (typeof supabase === 'undefined') {
                     .eq('screen', screenNumber)
                     .order('id', { ascending: true });
                 
-                if (error) { 
-                    console.error('Error fetching clinics by screen:', error); 
-                    return []; 
-                }
+                if (error) { console.error('Error fetching clinics by screen:', error); return []; }
                 
                 return data.map(c => ({
                     ...c,
@@ -76,10 +70,7 @@ if (typeof supabase === 'undefined') {
                     }])
                     .select();
                 
-                if (error) {
-                    console.error('Error adding clinic:', error);
-                    return null;
-                }
+                if (error) { console.error('Error adding clinic:', error); return null; }
                 return data[0];
             } catch (error) {
                 console.error('Exception in addClinic:', error);
@@ -93,12 +84,7 @@ if (typeof supabase === 'undefined') {
                     .from('clinics')
                     .update(updates)
                     .eq('id', clinicId);
-                
-                if (error) {
-                    console.error('Error updating clinic:', error);
-                    return false;
-                }
-                return true;
+                return !error;
             } catch (error) {
                 console.error('Exception in updateClinic:', error);
                 return false;
@@ -111,12 +97,7 @@ if (typeof supabase === 'undefined') {
                     .from('clinics')
                     .delete()
                     .eq('id', clinicId);
-                
-                if (error) {
-                    console.error('Error deleting clinic:', error);
-                    return false;
-                }
-                return true;
+                return !error;
             } catch (error) {
                 console.error('Exception in deleteClinic:', error);
                 return false;
@@ -132,12 +113,7 @@ if (typeof supabase === 'undefined') {
                         last_call: new Date().toISOString()
                     })
                     .eq('id', clinicId);
-                
-                if (error) {
-                    console.error('Error updating queue:', error);
-                    return false;
-                }
-                return true;
+                return !error;
             } catch (error) {
                 console.error('Exception in updateQueue:', error);
                 return false;
@@ -148,11 +124,7 @@ if (typeof supabase === 'undefined') {
             try {
                 const channel = window.supabaseClient
                     .channel('public:clinics')
-                    .on('postgres_changes', { 
-                        event: '*', 
-                        schema: 'public', 
-                        table: 'clinics' 
-                    }, (payload) => {
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'clinics' }, (payload) => {
                         const newData = payload.new;
                         if (newData) {
                             newData.current = newData.current_number || 0;
@@ -161,7 +133,6 @@ if (typeof supabase === 'undefined') {
                         callback(newData);
                     })
                     .subscribe();
-                
                 return channel;
             } catch (error) {
                 console.error('Exception in subscribeToClinicUpdates:', error);
@@ -177,10 +148,7 @@ if (typeof supabase === 'undefined') {
                     .select('*, clinics(name)')
                     .order('id', { ascending: true });
                 
-                if (error) {
-                    console.error('Error fetching doctors:', error);
-                    return [];
-                }
+                if (error) { console.error('Error fetching doctors:', error); return []; }
                 
                 return data.map(d => ({
                     ...d,
@@ -199,10 +167,7 @@ if (typeof supabase === 'undefined') {
                     .insert([doctorData])
                     .select();
                 
-                if (error) {
-                    console.error('Error adding doctor:', error);
-                    return null;
-                }
+                if (error) { console.error('Error adding doctor:', error); return null; }
                 return data[0];
             } catch (error) {
                 console.error('Exception in addDoctor:', error);
@@ -210,23 +175,18 @@ if (typeof supabase === 'undefined') {
             }
         },
 
-        // ==================== المواعيد (APPOINTMENTS) - (تمت الإضافة) ====================
+        // ==================== المواعيد (APPOINTMENTS) ====================
         getAppointments: async function(date) {
             try {
                 let query = window.supabaseClient
                     .from('appointments')
                     .select('*, clinics(name), doctors(name)');
                 
-                if (date) {
-                    query = query.eq('appointment_date', date);
-                }
+                if (date) { query = query.eq('appointment_date', date); }
                 
                 const { data, error } = await query.order('appointment_time', { ascending: true });
                 
-                if (error) {
-                    console.error('Error fetching appointments:', error);
-                    return [];
-                }
+                if (error) { console.error('Error fetching appointments:', error); return []; }
                 return data;
             } catch (error) {
                 console.error('Exception in getAppointments:', error);
@@ -241,10 +201,7 @@ if (typeof supabase === 'undefined') {
                     .insert([appointmentData])
                     .select();
                 
-                if (error) {
-                    console.error('Error adding appointment:', error);
-                    return null;
-                }
+                if (error) { console.error('Error adding appointment:', error); return null; }
                 return data[0];
             } catch (error) {
                 console.error('Exception in addAppointment:', error);
@@ -253,6 +210,7 @@ if (typeof supabase === 'undefined') {
         },
 
         // ==================== الاستشارات (CONSULTATIONS) - (تمت الإضافة) ====================
+        // هذه الدالة هي التي تحتاجها صفحة consultations.html
         addConsultation: async function(consultationData) {
             try {
                 const { data, error } = await window.supabaseClient
@@ -260,10 +218,7 @@ if (typeof supabase === 'undefined') {
                     .insert([consultationData])
                     .select();
                 
-                if (error) {
-                    console.error('Error adding consultation:', error);
-                    return null;
-                }
+                if (error) { console.error('Error adding consultation:', error); return null; }
                 return data[0];
             } catch (error) {
                 console.error('Exception in addConsultation:', error);
@@ -277,7 +232,7 @@ if (typeof supabase === 'undefined') {
                 if (status) query = query.eq('status', status);
                 
                 const { data, error } = await query.order('created_at', { ascending: false });
-                if (error) throw error;
+                if (error) { console.error('Error fetching consultations:', error); return []; }
                 return data;
             } catch (error) {
                 console.error('Error fetching consultations:', error);
@@ -291,8 +246,7 @@ if (typeof supabase === 'undefined') {
                     .from('consultations')
                     .update(updates)
                     .eq('id', id);
-                if (error) throw error;
-                return true;
+                return !error;
             } catch (error) {
                 console.error('Error updating consultation:', error);
                 return false;
@@ -307,12 +261,8 @@ if (typeof supabase === 'undefined') {
                     .select('*')
                     .eq('doctor_id', doctorId)
                     .eq('date', date);
-                if (error) throw error;
-                return data;
-            } catch (error) {
-                console.error('Error fetching attendance:', error);
-                return [];
-            }
+                return error ? [] : data;
+            } catch (error) { return []; }
         },
 
         checkIn: async function(doctorId) {
@@ -326,12 +276,8 @@ if (typeof supabase === 'undefined') {
                         status: 'present'
                     }])
                     .select();
-                if (error) throw error;
-                return data[0];
-            } catch (error) {
-                console.error('Error checking in:', error);
-                return null;
-            }
+                return error ? null : data[0];
+            } catch (error) { return null; }
         },
 
         checkOut: async function(attendanceId) {
@@ -340,26 +286,17 @@ if (typeof supabase === 'undefined') {
                     .from('attendance')
                     .update({ check_out: new Date().toISOString() })
                     .eq('id', attendanceId);
-                if (error) throw error;
-                return true;
-            } catch (error) {
-                console.error('Error checking out:', error);
-                return false;
-            }
+                return !error;
+            } catch (error) { return false; }
         },
 
         getLeaveRequests: async function(doctorId) {
              try {
                 let query = window.supabaseClient.from('leave_requests').select('*');
                 if (doctorId) query = query.eq('doctor_id', doctorId);
-                
                 const { data, error } = await query.order('created_at', { ascending: false });
-                if (error) throw error;
-                return data;
-            } catch (error) {
-                console.error('Error fetching leave requests:', error);
-                return [];
-            }
+                return error ? [] : data;
+            } catch (error) { return []; }
         },
 
         addLeaveRequest: async function(requestData) {
@@ -368,49 +305,33 @@ if (typeof supabase === 'undefined') {
                     .from('leave_requests')
                     .insert([requestData])
                     .select();
-                if (error) throw error;
-                return data[0];
-            } catch (error) {
-                console.error('Error adding leave request:', error);
-                return null;
-            }
+                return error ? null : data[0];
+            } catch (error) { return null; }
         },
 
-        // ==================== الإعدادات (SETTINGS) ====================
+        // ==================== الإعدادات والإحصائيات ====================
         getSettings: async function() {
             try {
-                const { data, error } = await window.supabaseClient
-                    .from('settings')
-                    .select('*')
-                    .single();
-                
+                const { data, error } = await window.supabaseClient.from('settings').select('*').single();
                 if (error && error.code !== 'PGRST116') return null;
                 return data;
-            } catch (error) {
-                console.error('Exception in getSettings:', error);
-                return null;
-            }
+            } catch (error) { return null; }
         },
 
         updateSettings: async function(settings) {
             try {
                 const { data: existing } = await window.supabaseClient.from('settings').select('id').single();
-                
                 if (existing) {
                     await window.supabaseClient.from('settings').update(settings).eq('id', existing.id);
                 } else {
                     await window.supabaseClient.from('settings').insert([settings]);
                 }
                 return true;
-            } catch (error) {
-                console.error('Exception in updateSettings:', error);
-                return false;
-            }
+            } catch (error) { return false; }
         },
 
-        // ==================== الإحصائيات (STATISTICS) ====================
         getStatistics: async function(date) {
-             try {
+            try {
                 const { data: clinics } = await window.supabaseClient
                     .from('clinics')
                     .select('*')
