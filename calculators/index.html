@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الحاسبات الطبية - نظام إدارة الطباب</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'arabic': ['Cairo', 'sans-serif'] },
+                    colors: {
+                        'primary': '#1e40af',
+                        'secondary': '#3b82f6',
+                        'accent': '#60a5fa',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f3f4f6; }
+        .calc-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body class="font-arabic text-gray-800">
+
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="../index.html" class="text-2xl font-bold text-primary flex items-center">
+                        <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                        العودة للرئيسية
+                    </a>
+                </div>
+                <h1 class="text-xl font-bold text-gray-700">🧮 الحاسبات الطبية</h1>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">أدوات صحية ذكية</h2>
+            <p class="text-lg text-gray-600">مجموعة من الحاسبات الطبية لمساعدتك في متابعة صحتك</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <a href="bmi.html" class="calc-card bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all border-t-4 border-blue-500 group cursor-pointer block">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <i class="fas fa-weight"></i>
+                    </div>
+                    <i class="fas fa-chevron-left text-gray-300"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">حساب الوزن المثالي (BMI)</h3>
+                <p class="text-gray-500 text-sm">احسب مؤشر كتلة الجسم لتعرف إذا كان وزنك طبيعياً</p>
+            </a>
+
+            <a href="gad7.html" class="calc-card bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all border-t-4 border-purple-500 group cursor-pointer block">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-2xl group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <i class="fas fa-chevron-left text-gray-300"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">مقياس القلق العام (GAD-7)</h3>
+                <p class="text-gray-500 text-sm">اختبار ذاتي سريع لتقييم مستوى القلق والتوتر لديك</p>
+            </a>
+
+            <a href="ovulation.html" class="calc-card bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all border-t-4 border-pink-500 group cursor-pointer block">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-14 h-14 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-2xl group-hover:bg-pink-600 group-hover:text-white transition-colors">
+                        <i class="fas fa-baby"></i>
+                    </div>
+                    <i class="fas fa-chevron-left text-gray-300"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">حاسبة التبويض</h3>
+                <p class="text-gray-500 text-sm">معرفة أيام الخصوبة العالية وموعد التبويض المتوقع</p>
+            </a>
+
+            </div>
+    </div>
+
+</body>
+</html>
