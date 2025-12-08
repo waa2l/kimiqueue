@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة مؤشرات الجسم (BMI, BRI, WHtR)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+        }
+        h1 {
+            color: #2c6e49;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: #555;
+            max-width: 90%;
+        }
+        .input-group {
+            margin-bottom: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #2c6e49;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        input:focus, select:focus {
+            border-color: #2c6e49;
+        }
+        button {
+            background-color: #2c6e49;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #1e4b33;
+        }
+        #result {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c6e49;
+            max-width: 90%;
+        }
+        .reference {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            color: #777;
+            max-width: 90%;
+        }
+        
+        /* إخفاء شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+        html {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                align-items: flex-start;
+                padding: 0.5rem 0;
+            }
+            .container {
+                padding: 1rem;
+                margin: 0.5rem;
+                min-height: auto;
+                border-radius: 5px;
+            }
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            p {
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+            }
+            .input-group {
+                margin-bottom: 1rem;
+                width: 95%;
+            }
+            input, select, button {
+                font-size: 0.9rem;
+                padding: 0.6rem;
+            }
+            #result {
+                font-size: 1rem;
+                margin-top: 1rem;
+            }
+            .reference {
+                font-size: 0.8rem;
+                margin-top: 1.5rem;
+                margin-bottom: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.8rem;
+                margin: 0.2rem;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            .input-group {
+                width: 98%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>حاسبة مؤشرات الجسم (BMI, BRI, WHtR)</h1>
+        <p>
+            هذه الأداة تجمع بين ثلاث حاسبات لتقييم الحالة الصحية: مؤشر كتلة الجسم (BMI) لتقييم الوزن العام، 
+            مؤشر استدارة الجسم (BRI) لتقييم توزيع الدهون، ونسبة الخصر إلى الطول (WHtR) لتقييم الدهون البطنية. 
+            أدخل بياناتك واختر نوع الحاسبة للحصول على النتائج. استشر طبيبك لتقييم دقيق لصحتك.
+        </p>
+        <div class="input-group">
+            <label for="calculatorType">اختر نوع الحاسبة:</label>
+            <select id="calculatorType" required>
+                <option value="" disabled selected>اختر الحاسبة</option>
+                <option value="bmi">مؤشر كتلة الجسم (BMI)</option>
+                <option value="bri">مؤشر استدارة الجسم (BRI)</option>
+                <option value="whtr">نسبة الخصر إلى الطول (WHtR)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="weight">الوزن (كجم):</label>
+            <input type="number" id="weight" placeholder="أدخل وزنك بالكيلوغرام" step="0.1" required>
+        </div>
+        <div class="input-group">
+            <label for="height">الطول (سم):</label>
+            <input type="number" id="height" placeholder="أدخل طولك بالسنتيمتر" step="0.1" required>
+        </div>
+        <div class="input-group">
+            <label for="waist">محيط الخصر (سم):</label>
+            <input type="number" id="waist" placeholder="أدخل محيط الخصر بالسنتيمتر" step="0.1">
+        </div>
+        <button onclick="calculateMetrics()">احسب النتيجة</button>
+        <div id="result"></div>
+        <div class="reference">
+            المراجع: 
+            <a href="https://www.who.int/tools/body-mass-index-calculator" target="_blank">منظمة الصحة العالمية (BMI)</a>, 
+            <a href="https://obesitycanada.ca" target="_blank">Obesity Canada (WHtR)</a>, 
+            <a href="https://www.truthaboutweight.global" target="_blank">Truth About Weight (WHtR, BRI)</a>
+        </div>
+    </div>
+
+    <script>
+        function calculateMetrics() {
+            const calculatorType = document.getElementById('calculatorType').value;
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value) / 100; // تحويل إلى متر
+            const waist = parseFloat(document.getElementById('waist').value) / 100; // تحويل إلى متر
+            const resultDiv = document.getElementById('result');
+
+            // التحقق من صحة المدخلات
+            if (!calculatorType) {
+                resultDiv.innerHTML = 'يرجى اختيار نوع الحاسبة';
+                return;
+            }
+            if (isNaN(weight) || isNaN(height) || weight <= 0 || height <= 0) {
+                resultDiv.innerHTML = 'يرجى إدخال قيم صحيحة للوزن والطول';
+                return;
+            }
+            if ((calculatorType === 'bri' || calculatorType === 'whtr') && (isNaN(waist) || waist <= 0)) {
+                resultDiv.innerHTML = 'يرجى إدخال قيمة صحيحة لمحيط الخصر';
+                return;
+            }
+
+            let result = '';
+            if (calculatorType === 'bmi') {
+                const bmi = (weight / (height * height)).toFixed(1);
+                let category = '';
+                if (bmi < 18.5) {
+                    category = 'نقص الوزن';
+                } else if (bmi >= 18.5 && bmi < 25) {
+                    category = 'الوزن الطبيعي';
+                } else if (bmi >= 25 && bmi < 30) {
+                    category = 'زيادة الوزن';
+                } else {
+                    category = 'السمنة';
+                }
+                result = `مؤشر كتلة الجسم (BMI): ${bmi} (${category})<br>` +
+                         `ملاحظة: BMI يقيس الوزن العام. استشر طبيبك لتقييم شامل.`;
+            } else if (calculatorType === 'bri') {
+                const bri = (364.2 - 365.5 * Math.sqrt(1 - Math.pow(waist / (2 * Math.PI), 2) / Math.pow(0.5 * height, 2))).toFixed(1);
+                let category = '';
+                if (bri < 3) {
+                    category = 'منخفض';
+                } else if (bri >= 3 && bri < 5) {
+                    category = 'متوسط';
+                } else {
+                    category = 'مرتفع';
+                }
+                result = `مؤشر استدارة الجسم (BRI): ${bri} (${category})<br>` +
+                         `ملاحظة: BRI يقيس توزيع الدهون البطنية. المستويات المرتفعة قد تشير إلى مخاطر صحية.`;
+            } else if (calculatorType === 'whtr') {
+                const whtr = (waist * 100 / (height * 100)).toFixed(2); // تحويل إلى نسبة
+                let category = '';
+                if (whtr < 0.42) {
+                    category = 'صحي جدًا';
+                } else if (whtr >= 0.42 && whtr < 0.50) {
+                    category = 'صحي';
+                } else if (whtr >= 0.50 && whtr < 0.60) {
+                    category = 'مخاطر متزايدة';
+                } else {
+                    category = 'مخاطر عالية';
+                }
+                result = `نسبة الخصر إلى الطول (WHtR): ${whtr} (${category})<br>` +
+                         `ملاحظة: WHtR يقيس الدهون البطنية. المستويات العالية تزيد من مخاطر القلب والسكري.`;
+            }
+
+            resultDiv.innerHTML = result;
+        }
+    </script>
+</body>
+</html>
