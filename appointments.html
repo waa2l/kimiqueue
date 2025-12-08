@@ -1,429 +1,433 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حجز المواعيد - نظام إدارة الطباب</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { 'arabic': ['Cairo', 'sans-serif'] },
-                    colors: {
-                        'primary': '#1e40af',
-                        'secondary': '#3b82f6',
-                        'success': '#10b981',
-                        'warning': '#f59e0b',
-                        'danger': '#ef4444'
-                    }
+// supabaseClient.js - النسخة المحدثة والكاملة
+const SUPABASE_URL = 'https://dkvefbjgsnhrkjpwprux.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrdmVmYmpnc25ocmtqcHdwcnV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTQ5MDksImV4cCI6MjA4MDYzMDkwOX0.fZxEFQc9iUtqX6XEtuuy_XfRIMp9oR3RKmJ84rUzyGw';
+
+// التحقق من تحميل مكتبة Supabase
+if (typeof supabase === 'undefined') {
+    console.error('❌ Supabase library not loaded! Make sure the script tag is correct.');
+} else {
+    console.log('✅ Supabase library loaded');
+    
+    // إنشاء عميل Supabase
+    window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Supabase client created');
+
+    // إنشاء دوال المساعدة
+    window.supabaseHelpers = {
+        // ==================== العيادات (CLINICS) ====================
+        getClinics: async function() {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('clinics')
+                    .select('*')
+                    .order('id', { ascending: true });
+                
+                if (error) { 
+                    console.error('Error fetching clinics:', error); 
+                    return []; 
                 }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Cairo', sans-serif; }
-        .time-slot {
-            transition: all 0.2s ease;
-        }
-        .time-slot:hover {
-            transform: scale(1.05);
-        }
-        .time-slot.selected {
-            background: linear-gradient(135deg, #3b82f6, #1e40af);
-            color: white;
-        }
-        .time-slot.booked {
-            background-color: #ef4444;
-            color: white;
-            cursor: not-allowed;
-        }
-        .calendar-day {
-            transition: all 0.2s ease;
-        }
-        .calendar-day:hover:not(.disabled) {
-            background-color: #3b82f6;
-            color: white;
-        }
-        .calendar-day.selected {
-            background: linear-gradient(135deg, #3b82f6, #1e40af);
-            color: white;
-        }
-        .calendar-day.disabled {
-            background-color: #f3f4f6;
-            color: #9ca3af;
-            cursor: not-allowed;
-        }
-    </style>
-</head>
-<body class="bg-gray-50 font-arabic">
-    <nav class="bg-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <h1 class="text-2xl font-bold text-primary">🏥 نظام إدارة الطباب</h1>
-                <div class="flex space-x-4 space-x-reverse">
-                    <a href="index.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md">الرئيسية</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="bg-white shadow">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="py-6">
-                <h1 class="text-3xl font-bold text-gray-900">حجز المواعيد</h1>
-                <p class="mt-2 text-gray-600">احجز موعدك بسهولة</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-2xl font-bold mb-6">معلومات الحجز</h2>
-                    
-                    <form id="appointment-form" class="space-y-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل *</label>
-                                <input type="text" id="patient-name" required class="w-full px-3 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">الرقم القومي *</label>
-                                <input type="text" id="national-id" required pattern="[0-9]{14}" maxlength="14" class="w-full px-3 py-2 border rounded-lg">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف *</label>
-                                <input type="tel" id="phone-number" required pattern="[0-9]{11}" maxlength="11" class="w-full px-3 py-2 border rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">البريد الإلكتروني</label>
-                                <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اختيار العيادة *</label>
-                            <select id="clinic-select" required class="w-full px-3 py-2 border rounded-lg">
-                                <option value="">جاري التحميل...</option>
-                            </select>
-                        </div>
-
-                        <div id="doctor-selection" style="display: none;">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اختيار الطبيب</label>
-                            <select id="doctor-select" class="w-full px-3 py-2 border rounded-lg">
-                                <option value="">أي طبيب متاح</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اختيار التاريخ *</label>
-                            <div id="calendar-container" class="bg-gray-50 p-4 rounded-lg">
-                                <div class="flex justify-between items-center mb-4">
-                                    <button type="button" onclick="previousMonth()" class="p-2 hover:bg-gray-200 rounded-lg">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </button>
-                                    <h3 class="text-lg font-semibold" id="calendar-month"></h3>
-                                    <button type="button" onclick="nextMonth()" class="p-2 hover:bg-gray-200 rounded-lg">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </button>
-                                </div>
-                                <div class="grid grid-cols-7 gap-2 mb-2">
-                                    <div class="text-center text-sm font-medium text-gray-500 py-2">الأحد</div>
-                                    <div class="text-center text-sm font-medium text-gray-500 py-2">الإثنين</div>
-                                    <div class="text-center text-sm font-medium text-gray-500 py-2">الثلاثاء</div>
-                                    <div class="text-center text-sm font-medium text-gray-500 py-2">الأربعاء</div>
-                                    <div class="text-center text-sm font-medium text-gray-500 py-2">الخميس</div>
-                                    <div class="text-center text-sm font-medium text-gray-500 py-2">الجمعة</div>
-                                    <div class="text-center text-sm font-medium text-gray-500 py-2">السبت</div>
-                                </div>
-                                <div id="calendar-days" class="grid grid-cols-7 gap-2"></div>
-                            </div>
-                        </div>
-
-                        <div id="time-selection" style="display: none;">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">اختيار الوقت *</label>
-                            <div class="grid grid-cols-3 md:grid-cols-4 gap-3" id="time-slots"></div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">سبب الزيارة</label>
-                            <textarea id="visit-reason" rows="3" placeholder="اكتب سبب الزيارة..." class="w-full px-3 py-2 border rounded-lg"></textarea>
-                        </div>
-
-                        <button type="submit" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-secondary font-semibold">
-                            <i class="fas fa-calendar-check ml-2"></i>حجز الموعد
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="space-y-6">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-lg font-semibold mb-4">مواعيد اليوم</h3>
-                    <div class="space-y-3" id="today-appointments">
-                        <p class="text-gray-500 text-center">جاري التحميل...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
-            <div class="text-success text-6xl mb-4">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <h3 class="text-2xl font-bold mb-4">تم حجز الموعد بنجاح!</h3>
-            <p class="text-gray-600 mb-6">سيتم إرسال تأكيد الحجز</p>
-            <div class="bg-gray-50 p-4 rounded-lg mb-6">
-                <div class="text-sm text-gray-600 mb-2">رقم الحجز</div>
-                <div class="text-2xl font-bold text-primary" id="booking-number"></div>
-            </div>
-            <button onclick="closeSuccessModal()" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-secondary">
-                حسناً
-            </button>
-        </div>
-    </div>
-
-    <script src="supabaseClient.js"></script>
-    <script>
-        let selectedDate = null;
-        let selectedTime = null;
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
-        let clinics = [];
-        let doctors = [];
-
-        function checkSupabaseReady() {
-            return new Promise((resolve) => {
-                if (window.supabaseHelpers) resolve();
-                else setTimeout(() => checkSupabaseReady().then(resolve), 100);
-            });
-        }
-
-        async function initialize() {
-            await checkSupabaseReady();
-            await loadClinics();
-            await loadTodayAppointments();
-            initializeCalendar();
-        }
-
-        async function loadClinics() {
-            clinics = await window.supabaseHelpers.getClinics();
-            const select = document.getElementById('clinic-select');
-            select.innerHTML = '<option value="">اختر العيادة</option>';
-            
-            clinics.forEach(clinic => {
-                const option = document.createElement('option');
-                option.value = clinic.id;
-                option.textContent = clinic.name;
-                select.appendChild(option);
-            });
-        }
-
-        async function loadTodayAppointments() {
-            const today = new Date().toISOString().split('T')[0];
-            const appointments = await window.supabaseHelpers.getAppointments(today);
-            
-            const container = document.getElementById('today-appointments');
-            container.innerHTML = '';
-            
-            if (appointments.length === 0) {
-                container.innerHTML = '<p class="text-gray-500 text-center">لا توجد مواعيد اليوم</p>';
-                return;
-            }
-            
-            appointments.slice(0, 5).forEach(apt => {
-                const div = document.createElement('div');
-                div.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg';
-                div.innerHTML = `
-                    <div>
-                        <div class="font-medium">${apt.clinics?.name || 'غير محدد'}</div>
-                        <div class="text-sm text-gray-600">${apt.patient_name}</div>
-                    </div>
-                    <div class="text-sm text-primary font-semibold">${apt.appointment_time?.substring(0, 5) || '--:--'}</div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        document.getElementById('clinic-select').addEventListener('change', async function() {
-            const clinicId = this.value;
-            const doctorSelection = document.getElementById('doctor-selection');
-            
-            if (clinicId) {
-                doctorSelection.style.display = 'block';
-                doctors = await window.supabaseHelpers.getDoctors();
-                const clinicDoctors = doctors.filter(d => d.clinic_id == clinicId);
                 
-                const select = document.getElementById('doctor-select');
-                select.innerHTML = '<option value="">أي طبيب متاح</option>';
-                
-                clinicDoctors.forEach(doctor => {
-                    const option = document.createElement('option');
-                    option.value = doctor.id;
-                    option.textContent = `${doctor.name} - ${doctor.specialty}`;
-                    select.appendChild(option);
-                });
-            } else {
-                doctorSelection.style.display = 'none';
+                return data.map(c => ({
+                    ...c,
+                    current: c.current_number || 0,
+                    lastCall: c.last_call ? new Date(c.last_call).toLocaleTimeString('ar-EG') : '-'
+                }));
+            } catch (error) {
+                console.error('Exception in getClinics:', error);
+                return [];
             }
-        });
+        },
 
-        function initializeCalendar() {
-            generateCalendar(currentMonth, currentYear);
-        }
-
-        function generateCalendar(month, year) {
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const today = new Date();
-            
-            const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-            document.getElementById('calendar-month').textContent = `${monthNames[month]} ${year}`;
-            
-            const calendarDays = document.getElementById('calendar-days');
-            calendarDays.innerHTML = '';
-            
-            for (let i = 0; i < firstDay; i++) {
-                calendarDays.appendChild(document.createElement('div'));
+        getClinicsByScreen: async function(screenNumber) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('clinics')
+                    .select('*')
+                    .eq('screen', screenNumber)
+                    .order('id', { ascending: true });
+                
+                if (error) { 
+                    console.error('Error fetching clinics by screen:', error); 
+                    return []; 
+                }
+                
+                return data.map(c => ({
+                    ...c,
+                    current: c.current_number || 0,
+                    lastCall: c.last_call ? new Date(c.last_call).toLocaleTimeString('ar-EG') : '-'
+                }));
+            } catch (error) {
+                console.error('Exception in getClinicsByScreen:', error);
+                return [];
             }
-            
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayElement = document.createElement('div');
-                dayElement.className = 'calendar-day text-center py-2 px-1 rounded-lg cursor-pointer text-sm';
-                dayElement.textContent = day;
+        },
+
+        addClinic: async function(clinicData) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('clinics')
+                    .insert([{
+                        name: clinicData.name,
+                        number: clinicData.number,
+                        screen: clinicData.screen,
+                        password: clinicData.password,
+                        status: 'active',
+                        current_number: 0
+                    }])
+                    .select();
                 
-                const currentDate = new Date(year, month, day);
-                currentDate.setHours(0, 0, 0, 0);
-                today.setHours(0, 0, 0, 0);
+                if (error) {
+                    console.error('Error adding clinic:', error);
+                    return null;
+                }
+                return data[0];
+            } catch (error) {
+                console.error('Exception in addClinic:', error);
+                return null;
+            }
+        },
+
+        updateClinic: async function(clinicId, updates) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('clinics')
+                    .update(updates)
+                    .eq('id', clinicId);
                 
-                if (currentDate < today) {
-                    dayElement.classList.add('disabled');
+                if (error) {
+                    console.error('Error updating clinic:', error);
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Exception in updateClinic:', error);
+                return false;
+            }
+        },
+
+        deleteClinic: async function(clinicId) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('clinics')
+                    .delete()
+                    .eq('id', clinicId);
+                
+                if (error) {
+                    console.error('Error deleting clinic:', error);
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Exception in deleteClinic:', error);
+                return false;
+            }
+        },
+
+        updateQueue: async function(clinicId, newNumber) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('clinics')
+                    .update({ 
+                        current_number: newNumber,
+                        last_call: new Date().toISOString()
+                    })
+                    .eq('id', clinicId);
+                
+                if (error) {
+                    console.error('Error updating queue:', error);
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Exception in updateQueue:', error);
+                return false;
+            }
+        },
+
+        subscribeToClinicUpdates: function(callback) {
+            try {
+                const channel = window.supabaseClient
+                    .channel('public:clinics')
+                    .on('postgres_changes', { 
+                        event: '*', 
+                        schema: 'public', 
+                        table: 'clinics' 
+                    }, (payload) => {
+                        const newData = payload.new;
+                        if (newData) {
+                            newData.current = newData.current_number || 0;
+                            newData.lastCall = new Date().toLocaleTimeString('ar-EG');
+                        }
+                        callback(newData);
+                    })
+                    .subscribe();
+                
+                return channel;
+            } catch (error) {
+                console.error('Exception in subscribeToClinicUpdates:', error);
+                return null;
+            }
+        },
+
+        // ==================== الأطباء (DOCTORS) ====================
+        getDoctors: async function() {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('doctors')
+                    .select('*, clinics(name)')
+                    .order('id', { ascending: true });
+                
+                if (error) {
+                    console.error('Error fetching doctors:', error);
+                    return [];
+                }
+                
+                return data.map(d => ({
+                    ...d,
+                    clinic: d.clinics?.name || 'غير محدد'
+                }));
+            } catch (error) {
+                console.error('Exception in getDoctors:', error);
+                return [];
+            }
+        },
+
+        addDoctor: async function(doctorData) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('doctors')
+                    .insert([doctorData])
+                    .select();
+                
+                if (error) {
+                    console.error('Error adding doctor:', error);
+                    return null;
+                }
+                return data[0];
+            } catch (error) {
+                console.error('Exception in addDoctor:', error);
+                return null;
+            }
+        },
+
+        // ==================== المواعيد (APPOINTMENTS) - (تمت الإضافة) ====================
+        getAppointments: async function(date) {
+            try {
+                let query = window.supabaseClient
+                    .from('appointments')
+                    .select('*, clinics(name), doctors(name)');
+                
+                if (date) {
+                    query = query.eq('appointment_date', date);
+                }
+                
+                const { data, error } = await query.order('appointment_time', { ascending: true });
+                
+                if (error) {
+                    console.error('Error fetching appointments:', error);
+                    return [];
+                }
+                return data;
+            } catch (error) {
+                console.error('Exception in getAppointments:', error);
+                return [];
+            }
+        },
+
+        addAppointment: async function(appointmentData) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('appointments')
+                    .insert([appointmentData])
+                    .select();
+                
+                if (error) {
+                    console.error('Error adding appointment:', error);
+                    return null;
+                }
+                return data[0];
+            } catch (error) {
+                console.error('Exception in addAppointment:', error);
+                return null;
+            }
+        },
+
+        // ==================== الاستشارات (CONSULTATIONS) - (تمت الإضافة) ====================
+        addConsultation: async function(consultationData) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('consultations')
+                    .insert([consultationData])
+                    .select();
+                
+                if (error) {
+                    console.error('Error adding consultation:', error);
+                    return null;
+                }
+                return data[0];
+            } catch (error) {
+                console.error('Exception in addConsultation:', error);
+                return null;
+            }
+        },
+
+        getConsultations: async function(status) {
+            try {
+                let query = window.supabaseClient.from('consultations').select('*');
+                if (status) query = query.eq('status', status);
+                
+                const { data, error } = await query.order('created_at', { ascending: false });
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Error fetching consultations:', error);
+                return [];
+            }
+        },
+
+        updateConsultation: async function(id, updates) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('consultations')
+                    .update(updates)
+                    .eq('id', id);
+                if (error) throw error;
+                return true;
+            } catch (error) {
+                console.error('Error updating consultation:', error);
+                return false;
+            }
+        },
+
+        // ==================== الحضور والإجازات (ATTENDANCE & LEAVES) ====================
+        getAttendance: async function(doctorId, date) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('attendance')
+                    .select('*')
+                    .eq('doctor_id', doctorId)
+                    .eq('date', date);
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Error fetching attendance:', error);
+                return [];
+            }
+        },
+
+        checkIn: async function(doctorId) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('attendance')
+                    .insert([{
+                        doctor_id: doctorId,
+                        date: new Date().toISOString().split('T')[0],
+                        check_in: new Date().toISOString(),
+                        status: 'present'
+                    }])
+                    .select();
+                if (error) throw error;
+                return data[0];
+            } catch (error) {
+                console.error('Error checking in:', error);
+                return null;
+            }
+        },
+
+        checkOut: async function(attendanceId) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('attendance')
+                    .update({ check_out: new Date().toISOString() })
+                    .eq('id', attendanceId);
+                if (error) throw error;
+                return true;
+            } catch (error) {
+                console.error('Error checking out:', error);
+                return false;
+            }
+        },
+
+        getLeaveRequests: async function(doctorId) {
+             try {
+                let query = window.supabaseClient.from('leave_requests').select('*');
+                if (doctorId) query = query.eq('doctor_id', doctorId);
+                
+                const { data, error } = await query.order('created_at', { ascending: false });
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Error fetching leave requests:', error);
+                return [];
+            }
+        },
+
+        addLeaveRequest: async function(requestData) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('leave_requests')
+                    .insert([requestData])
+                    .select();
+                if (error) throw error;
+                return data[0];
+            } catch (error) {
+                console.error('Error adding leave request:', error);
+                return null;
+            }
+        },
+
+        // ==================== الإعدادات (SETTINGS) ====================
+        getSettings: async function() {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('settings')
+                    .select('*')
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') return null;
+                return data;
+            } catch (error) {
+                console.error('Exception in getSettings:', error);
+                return null;
+            }
+        },
+
+        updateSettings: async function(settings) {
+            try {
+                const { data: existing } = await window.supabaseClient.from('settings').select('id').single();
+                
+                if (existing) {
+                    await window.supabaseClient.from('settings').update(settings).eq('id', existing.id);
                 } else {
-                    dayElement.addEventListener('click', () => selectDate(day, month, year));
+                    await window.supabaseClient.from('settings').insert([settings]);
                 }
+                return true;
+            } catch (error) {
+                console.error('Exception in updateSettings:', error);
+                return false;
+            }
+        },
+
+        // ==================== الإحصائيات (STATISTICS) ====================
+        getStatistics: async function(date) {
+            // ... (نفس كود الإحصائيات السابق)
+             try {
+                const { data: clinics } = await window.supabaseClient
+                    .from('clinics')
+                    .select('*')
+                    .eq('status', 'active');
                 
-                calendarDays.appendChild(dayElement);
+                return {
+                    dailyPatients: clinics?.reduce((sum, c) => sum + (c.current_number || 0), 0) || 0,
+                    activeClinics: clinics?.length || 0,
+                    avgWaitTime: 12,
+                    systemEfficiency: 94
+                };
+            } catch (error) {
+                return { dailyPatients: 0, activeClinics: 0, avgWaitTime: 0, systemEfficiency: 0 };
             }
         }
+    };
 
-        function selectDate(day, month, year) {
-            document.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
-            event.target.classList.add('selected');
-            
-            selectedDate = new Date(year, month, day);
-            generateTimeSlots();
-            document.getElementById('time-selection').style.display = 'block';
-        }
-
-        function generateTimeSlots() {
-            const container = document.getElementById('time-slots');
-            container.innerHTML = '';
-            
-            for (let hour = 8; hour < 20; hour++) {
-                for (let minute = 0; minute < 60; minute += 30) {
-                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                    const displayTime = formatTime(hour, minute);
-                    
-                    const timeSlot = document.createElement('div');
-                    timeSlot.className = 'time-slot text-center p-3 border rounded-lg cursor-pointer text-sm';
-                    timeSlot.textContent = displayTime;
-                    
-                    if (Math.random() > 0.8) {
-                        timeSlot.classList.add('booked');
-                        timeSlot.textContent += ' (محجوز)';
-                    } else {
-                        timeSlot.addEventListener('click', () => selectTime(timeString, timeSlot));
-                    }
-                    
-                    container.appendChild(timeSlot);
-                }
-            }
-        }
-
-        function selectTime(time, element) {
-            document.querySelectorAll('.time-slot.selected').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-            selectedTime = time;
-        }
-
-        function formatTime(hour, minute) {
-            const period = hour >= 12 ? 'م' : 'ص';
-            const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
-            return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
-        }
-
-        function previousMonth() {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            generateCalendar(currentMonth, currentYear);
-        }
-
-        function nextMonth() {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            generateCalendar(currentMonth, currentYear);
-        }
-
-        document.getElementById('appointment-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (!selectedDate || !selectedTime) {
-                alert('الرجاء اختيار التاريخ والوقت');
-                return;
-            }
-            
-            const appointmentData = {
-                patient_name: document.getElementById('patient-name').value,
-                national_id: document.getElementById('national-id').value,
-                phone: document.getElementById('phone-number').value,
-                email: document.getElementById('email').value || null,
-                clinic_id: parseInt(document.getElementById('clinic-select').value),
-                doctor_id: document.getElementById('doctor-select').value ? parseInt(document.getElementById('doctor-select').value) : null,
-                appointment_date: selectedDate.toISOString().split('T')[0],
-                appointment_time: selectedTime,
-                visit_reason: document.getElementById('visit-reason').value || null,
-                status: 'confirmed',
-                booking_number: `APT${Date.now()}`
-            };
-            
-            const result = await window.supabaseHelpers.addAppointment(appointmentData);
-            
-            if (result) {
-                document.getElementById('booking-number').textContent = appointmentData.booking_number;
-                document.getElementById('success-modal').classList.remove('hidden');
-                document.getElementById('success-modal').classList.add('flex');
-                this.reset();
-                selectedDate = null;
-                selectedTime = null;
-                document.getElementById('time-selection').style.display = 'none';
-                await loadTodayAppointments();
-            } else {
-                alert('حدث خطأ في الحجز');
-            }
-        });
-
-        function closeSuccessModal() {
-            document.getElementById('success-modal').classList.add('hidden');
-            document.getElementById('success-modal').classList.remove('flex');
-        }
-
-        initialize();
-    </script>
-</body>
-</html>
+    console.log('✅ Supabase Helpers Loaded Successfully!');
+}
