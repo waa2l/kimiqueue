@@ -6,21 +6,16 @@
     <title>بوابة الأطباء - نظام إدارة الطباب</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <!-- Supabase Client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabaseClient.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        'arabic': ['Cairo', 'sans-serif']
-                    },
+                    fontFamily: { 'arabic': ['Cairo', 'sans-serif'] },
                     colors: {
                         'primary': '#1e40af',
                         'secondary': '#3b82f6',
-                        'accent': '#60a5fa',
                         'success': '#10b981',
                         'warning': '#f59e0b',
                         'danger': '#ef4444'
@@ -30,77 +25,38 @@
         }
     </script>
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-        }
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-left: 8px;
-        }
-        .status-pending { background-color: #f59e0b; }
-        .status-approved { background-color: #10b981; }
-        .status-rejected { background-color: #ef4444; }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        body { font-family: 'Cairo', sans-serif; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body class="bg-gray-50 font-arabic">
-    <!-- Navigation -->
     <nav class="bg-white shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <h1 class="text-2xl font-bold text-primary">🏥 نظام إدارة الطباب</h1>
-                    </div>
-                </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4 space-x-reverse">
-                        <a href="index.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">الرئيسية</a>
-                        <a href="admin.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">الإدارة</a>
-                        <a href="display.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">العرض</a>
-                        <a href="control.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">التحكم</a>
-                        <a href="client.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">العميل</a>
-                        <a href="about.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors">عن النظام</a>
-                    </div>
-                </div>
+                <h1 class="text-2xl font-bold text-primary">🏥 بوابة الأطباء</h1>
+                <a href="index.html" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md">الرئيسية</a>
             </div>
         </div>
     </nav>
 
     <!-- Login Modal -->
-    <div id="login-modal" class="modal">
+    <div id="login-modal" class="modal show">
         <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">تسجيل الدخول - الأطباء</h2>
                 <p class="text-gray-600">أدخل بياناتك للوصول إلى بوابة الأطباء</p>
             </div>
-            <form id="doctor-login-form">
+            <form id="login-form">
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">البريد الإلكتروني</label>
-                    <input type="email" id="doctor-email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary" required>
+                    <input type="email" id="doctor-email" value="ahmed@clinic.com" class="w-full px-3 py-2 border rounded-lg" required>
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2">كلمة المرور</label>
-                    <input type="password" id="doctor-password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary" required>
+                    <input type="password" id="doctor-password" value="doctor123" class="w-full px-3 py-2 border rounded-lg" required>
                 </div>
-                <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary transition-colors">
+                <button type="submit" class="w-full bg-primary text-white py-2 rounded-lg hover:bg-secondary">
                     تسجيل الدخول
                 </button>
             </form>
@@ -109,7 +65,6 @@
 
     <!-- Main Portal -->
     <div id="doctor-portal" class="hidden">
-        <!-- Header -->
         <div class="bg-white shadow">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center py-6">
@@ -118,16 +73,16 @@
                             <i class="fas fa-user-md"></i>
                         </div>
                         <div>
-                            <h1 id="doctor-name" class="text-2xl font-bold text-gray-900">د. أحمد محمد</h1>
-                            <p id="doctor-specialty" class="text-gray-600">طبيب أسرة - عيادة طب الأسرة</p>
+                            <h1 id="doctor-name" class="text-2xl font-bold text-gray-900"></h1>
+                            <p id="doctor-specialty" class="text-gray-600"></p>
                         </div>
                     </div>
                     <div class="flex items-center space-x-4 space-x-reverse">
                         <div class="text-center">
-                            <div class="text-2xl font-bold text-success" id="attendance-status">حاضر</div>
+                            <div class="text-2xl font-bold text-success" id="attendance-status">--</div>
                             <div class="text-sm text-gray-600">الحالة</div>
                         </div>
-                        <button onclick="logoutDoctor()" class="bg-danger text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                        <button onclick="logoutDoctor()" class="bg-danger text-white px-4 py-2 rounded-lg hover:bg-red-600">
                             <i class="fas fa-sign-out-alt ml-2"></i>خروج
                         </button>
                     </div>
@@ -135,46 +90,24 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Main Panel -->
                 <div class="lg:col-span-2 space-y-6">
                     <!-- Today's Schedule -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-xl font-semibold">جدول اليوم</h2>
                             <div class="flex space-x-2 space-x-reverse">
-                                <button onclick="checkIn()" class="bg-success text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors">
+                                <button onclick="checkIn()" id="check-in-btn" class="bg-success text-white px-4 py-2 rounded-lg hover:bg-green-600">
                                     <i class="fas fa-clock ml-2"></i>تسجيل حضور
                                 </button>
-                                <button onclick="checkOut()" class="bg-warning text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors">
+                                <button onclick="checkOut()" id="check-out-btn" class="bg-warning text-white px-4 py-2 rounded-lg hover:bg-yellow-600" style="display:none">
                                     <i class="fas fa-sign-out-alt ml-2"></i>تسجيل انصراف
                                 </button>
                             </div>
                         </div>
                         <div class="space-y-3" id="today-schedule">
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium">فاطمة أحمد محمد</div>
-                                    <div class="text-sm text-gray-600">موعد روتيني - فحص دوري</div>
-                                </div>
-                                <div class="text-sm text-primary font-semibold">09:00 ص</div>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium">خالد عبد الله</div>
-                                    <div class="text-sm text-gray-600">متابعة علاج</div>
-                                </div>
-                                <div class="text-sm text-primary font-semibold">09:30 ص</div>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium">ليلى محمود</div>
-                                    <div class="text-sm text-gray-600">استشارة طبية</div>
-                                </div>
-                                <div class="text-sm text-primary font-semibold">10:00 ص</div>
-                            </div>
+                            <p class="text-gray-500 text-center">جاري التحميل...</p>
                         </div>
                     </div>
 
@@ -182,45 +115,10 @@
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-xl font-semibold">الاستشارات الواردة</h2>
-                            <span class="bg-danger text-white px-2 py-1 rounded text-sm">3 جديدة</span>
+                            <span class="bg-danger text-white px-2 py-1 rounded text-sm" id="consultations-count">0</span>
                         </div>
                         <div class="space-y-4" id="consultations-list">
-                            <div class="border border-gray-200 rounded-lg p-4">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div>
-                                        <h3 class="font-semibold">أحمد محمد عبد الله</h3>
-                                        <p class="text-sm text-gray-600">استشارة طبية عامة</p>
-                                    </div>
-                                    <span class="text-xs text-gray-500">منذ 2 ساعة</span>
-                                </div>
-                                <p class="text-sm text-gray-700 mb-3">أعاني من صداع مستمر منذ أسبوع مع بعض الدوار، هل من الممكن أن أحصل على استشارة طبية؟</p>
-                                <div class="flex space-x-2 space-x-reverse">
-                                    <button onclick="viewConsultation(1)" class="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-secondary transition-colors">
-                                        <i class="fas fa-eye ml-1"></i>عرض التفاصيل
-                                    </button>
-                                    <button onclick="replyConsultation(1)" class="bg-success text-white px-3 py-1 rounded text-sm hover:bg-green-600 transition-colors">
-                                        <i class="fas fa-reply ml-1"></i>الرد
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="border border-gray-200 rounded-lg p-4">
-                                <div class="flex justify-between items-start mb-3">
-                                    <div>
-                                        <h3 class="font-semibold">فاطمة علي حسن</h3>
-                                        <p class="text-sm text-gray-600">متابعة علاج</p>
-                                    </div>
-                                    <span class="text-xs text-gray-500">منذ 4 ساعات</span>
-                                </div>
-                                <p class="text-sm text-gray-700 mb-3">أحتاج إلى متابعة مع الطبيب بعد العملية الجراحية، هل يمكنني الحصول على موعد قريب؟</p>
-                                <div class="flex space-x-2 space-x-reverse">
-                                    <button onclick="viewConsultation(2)" class="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-secondary transition-colors">
-                                        <i class="fas fa-eye ml-1"></i>عرض التفاصيل
-                                    </button>
-                                    <button onclick="replyConsultation(2)" class="bg-success text-white px-3 py-1 rounded text-sm hover:bg-green-600 transition-colors">
-                                        <i class="fas fa-reply ml-1"></i>الرد
-                                    </button>
-                                </div>
-                            </div>
+                            <p class="text-gray-500 text-center">جاري التحميل...</p>
                         </div>
                     </div>
 
@@ -228,104 +126,56 @@
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-xl font-semibold">طلبات الإجازة</h2>
-                            <button onclick="openLeaveRequestModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-colors">
+                            <button onclick="openLeaveRequestModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary">
                                 <i class="fas fa-plus ml-2"></i>طلب جديد
                             </button>
                         </div>
                         <div class="space-y-3" id="leave-requests">
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium">إجازة مرضية</div>
-                                    <div class="text-sm text-gray-600">من 2025-12-10 إلى 2025-12-12</div>
-                                </div>
-                                <div class="flex items-center">
-                                    <span class="status-indicator status-approved"></span>
-                                    <span class="text-sm font-medium text-success">معتمد</span>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <div>
-                                    <div class="font-medium">إجازة اعتيادية</div>
-                                    <div class="text-sm text-gray-600">من 2025-12-15 إلى 2025-12-17</div>
-                                </div>
-                                <div class="flex items-center">
-                                    <span class="status-indicator status-pending"></span>
-                                    <span class="text-sm font-medium text-warning">قيد الانتظار</span>
-                                </div>
-                            </div>
+                            <p class="text-gray-500 text-center">جاري التحميل...</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sidebar -->
                 <div class="space-y-6">
-                    <!-- Doctor Profile -->
+                    <!-- Profile -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <div class="text-center mb-4">
                             <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white text-3xl mx-auto mb-3">
                                 <i class="fas fa-user-md"></i>
                             </div>
-                            <h3 class="font-semibold">د. أحمد محمد</h3>
-                            <p class="text-sm text-gray-600">طبيب أسرة</p>
+                            <h3 class="font-semibold" id="profile-name"></h3>
+                            <p class="text-sm text-gray-600" id="profile-specialty"></p>
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">رقم الطبيب</span>
-                                <span class="font-medium">001</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">العيادة</span>
-                                <span class="font-medium">طب الأسرة</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">الشيفت</span>
-                                <span class="font-medium">صباحي</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">رصيد الإجازات</span>
-                                <span class="font-medium text-success">12 يوم</span>
-                            </div>
+                        <div class="space-y-3" id="profile-info">
                         </div>
                     </div>
 
-                    <!-- Quick Stats -->
+                    <!-- Stats -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h3 class="text-lg font-semibold mb-4">إحصائيات اليوم</h3>
                         <div class="space-y-4">
                             <div class="flex justify-between items-center">
-                                <span class="text-gray-600">المرضى المشاهدين</span>
-                                <span class="font-semibold text-primary">12</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-600">المواعيد المتبقية</span>
-                                <span class="font-semibold text-warning">8</span>
-                            </div>
-                            <div class="flex justify-between items-center">
                                 <span class="text-gray-600">الاستشارات</span>
-                                <span class="font-semibold text-success">5</span>
+                                <span class="font-semibold text-success" id="stat-consultations">0</span>
                             </div>
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-600">ساعات العمل</span>
-                                <span class="font-semibold text-secondary">6 ساعات</span>
+                                <span class="font-semibold text-secondary" id="stat-hours">0</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Attendance History -->
+                    <!-- Attendance -->
                     <div class="bg-white rounded-lg shadow-lg p-6">
                         <h3 class="text-lg font-semibold mb-4">سجل الحضور</h3>
                         <div class="space-y-2">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">دخول اليوم</span>
-                                <span class="font-medium">08:30 ص</span>
+                                <span class="font-medium" id="check-in-time">--:--</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-600">آخر خروج</span>
-                                <span class="font-medium">--:--</span>
-                            </div>
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">الإجمالي</span>
-                                <span class="font-medium text-success">0 ساعة</span>
+                                <span class="font-medium" id="check-out-time">--:--</span>
                             </div>
                         </div>
                     </div>
@@ -346,142 +196,282 @@
             <form id="leave-request-form">
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">نوع الطلب</label>
-                    <select id="leave-type" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary" required>
-                        <option value="">اختر النوع</option>
+                    <select id="leave-type" class="w-full px-3 py-2 border rounded-lg" required>
                         <option value="annual">إجازة اعتيادية</option>
                         <option value="sick">إجازة مرضية</option>
                         <option value="emergency">إجازة عارضة</option>
-                        <option value="compensation">بدل راحة</option>
-                        <option value="mission">مأمورية</option>
-                        <option value="training">مأمورية تدريب</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-gray-700 text-sm font-bold mb-2">من تاريخ</label>
-                        <input type="date" id="leave-start" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary" required>
+                        <input type="date" id="leave-start" class="w-full px-3 py-2 border rounded-lg" required>
                     </div>
                     <div>
                         <label class="block text-gray-700 text-sm font-bold mb-2">إلى تاريخ</label>
-                        <input type="date" id="leave-end" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary" required>
+                        <input type="date" id="leave-end" class="w-full px-3 py-2 border rounded-lg" required>
                     </div>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">القائم بالعمل</label>
-                    <input type="text" id="replacement-doctor" placeholder="اسم الطبيب البديل" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary">
                 </div>
                 <div class="mb-6">
                     <label class="block text-gray-700 text-sm font-bold mb-2">السبب/الملاحظات</label>
-                    <textarea id="leave-notes" rows="3" placeholder="اكتب سبب الطلب..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-primary"></textarea>
+                    <textarea id="leave-notes" rows="3" class="w-full px-3 py-2 border rounded-lg"></textarea>
                 </div>
                 <div class="flex space-x-3 space-x-reverse">
-                    <button type="submit" class="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-secondary transition-colors">
-                        <i class="fas fa-paper-plane ml-2"></i>إرسال الطلب
-                    </button>
-                    <button type="button" onclick="closeLeaveRequestModal()" class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                        إلغاء
-                    </button>
+                    <button type="submit" class="flex-1 bg-primary text-white py-2 rounded-lg hover:bg-secondary">إرسال</button>
+                    <button type="button" onclick="closeLeaveRequestModal()" class="flex-1 bg-gray-500 text-white py-2 rounded-lg">إلغاء</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script>
-        // Sample doctor data
-        const doctorData = {
-            id: 1,
-            name: 'د. أحمد محمد',
-            specialty: 'طبيب أسرة',
-            clinic: 'عيادة طب الأسرة',
-            email: 'dr.ahmed@clinic.com',
-            phone: '0501234567',
-            nationalId: '12345678901234'
-        };
+    <!-- Consultation Reply Modal -->
+    <div id="reply-modal" class="modal">
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">الرد على الاستشارة</h3>
+                <button onclick="closeReplyModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="consultation-details" class="mb-4 p-4 bg-gray-50 rounded-lg"></div>
+            <form id="reply-form">
+                <input type="hidden" id="reply-consultation-id">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">الرد الطبي</label>
+                    <textarea id="doctor-response" rows="5" class="w-full px-3 py-2 border rounded-lg" required></textarea>
+                </div>
+                <div class="flex space-x-3 space-x-reverse">
+                    <button type="submit" class="flex-1 bg-success text-white py-2 rounded-lg hover:bg-green-600">إرسال الرد</button>
+                    <button type="button" onclick="closeReplyModal()" class="flex-1 bg-gray-500 text-white py-2 rounded-lg">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        // Authentication
-        document.getElementById('doctor-login-form').addEventListener('submit', function(e) {
+    <script src="supabaseClient.js"></script>
+    <script>
+        let currentDoctor = null;
+        let currentAttendanceId = null;
+
+        function checkSupabaseReady() {
+            return new Promise((resolve) => {
+                if (window.supabaseHelpers) resolve();
+                else setTimeout(() => checkSupabaseReady().then(resolve), 100);
+            });
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
             e.preventDefault();
+            await checkSupabaseReady();
+            
             const email = document.getElementById('doctor-email').value;
             const password = document.getElementById('doctor-password').value;
             
-            // Simple authentication (in real app, this would be server-side)
-            if (email === 'doctor@clinic.com' && password === 'doctor123') {
-                localStorage.setItem('doctorLoggedIn', 'true');
+            const doctors = await window.supabaseHelpers.getDoctors();
+            const doctor = doctors.find(d => d.email === email && d.password === password);
+            
+            if (doctor) {
+                currentDoctor = doctor;
+                localStorage.setItem('currentDoctor', JSON.stringify(doctor));
                 initializeDoctorPortal();
             } else {
                 alert('بيانات الدخول غير صحيحة');
             }
         });
 
-        function initializeDoctorPortal() {
+        async function initializeDoctorPortal() {
             document.getElementById('login-modal').classList.remove('show');
             document.getElementById('doctor-portal').classList.remove('hidden');
             
-            // Load doctor data
-            document.getElementById('doctor-name').textContent = doctorData.name;
-            document.getElementById('doctor-specialty').textContent = `${doctorData.specialty} - ${doctorData.clinic}`;
+            document.getElementById('doctor-name').textContent = currentDoctor.name;
+            document.getElementById('doctor-specialty').textContent = `${currentDoctor.specialty} - ${currentDoctor.clinic}`;
+            document.getElementById('profile-name').textContent = currentDoctor.name;
+            document.getElementById('profile-specialty').textContent = currentDoctor.specialty;
             
-            startRealTimeUpdates();
+            const profileInfo = document.getElementById('profile-info');
+            profileInfo.innerHTML = `
+                <div class="flex justify-between">
+                    <span class="text-gray-600">العيادة</span>
+                    <span class="font-medium">${currentDoctor.clinic}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">الحالة</span>
+                    <span class="font-medium text-success">${currentDoctor.status === 'active' ? 'نشط' : 'في إجازة'}</span>
+                </div>
+            `;
+            
+            await loadConsultations();
+            await loadLeaveRequests();
+            await loadTodayAppointments();
+            checkTodayAttendance();
         }
 
-        function logoutDoctor() {
-            localStorage.removeItem('doctorLoggedIn');
-            location.reload();
+        async function loadConsultations() {
+            const consultations = await window.supabaseHelpers.getConsultations('pending');
+            const myConsultations = consultations.filter(c => c.specialty === currentDoctor.specialty);
+            
+            document.getElementById('consultations-count').textContent = myConsultations.length;
+            document.getElementById('stat-consultations').textContent = myConsultations.length;
+            
+            const container = document.getElementById('consultations-list');
+            container.innerHTML = '';
+            
+            if (myConsultations.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center">لا توجد استشارات جديدة</p>';
+                return;
+            }
+            
+            myConsultations.forEach(consultation => {
+                const div = document.createElement('div');
+                div.className = 'border rounded-lg p-4';
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-semibold">${consultation.patient_name}</h3>
+                            <p class="text-sm text-gray-600">${consultation.specialty}</p>
+                        </div>
+                        <span class="text-xs text-gray-500">${new Date(consultation.created_at).toLocaleString('ar-EG')}</span>
+                    </div>
+                    <p class="text-sm text-gray-700 mb-3">${consultation.complaint}</p>
+                    <button onclick="openReplyModal(${consultation.id}, '${consultation.patient_name}', '${consultation.complaint}')" class="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-secondary">
+                        <i class="fas fa-reply ml-1"></i>الرد
+                    </button>
+                `;
+                container.appendChild(div);
+            });
         }
 
-        function checkAuth() {
-            const loggedIn = localStorage.getItem('doctorLoggedIn');
-            if (loggedIn) {
-                initializeDoctorPortal();
-            } else {
-                document.getElementById('login-modal').classList.add('show');
+        async function loadLeaveRequests() {
+            const requests = await window.supabaseHelpers.getLeaveRequests(currentDoctor.id);
+            
+            const container = document.getElementById('leave-requests');
+            container.innerHTML = '';
+            
+            if (requests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center">لا توجد طلبات</p>';
+                return;
+            }
+            
+            requests.slice(0, 5).forEach(request => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg';
+                const statusColor = request.status === 'approved' ? 'text-success' : request.status === 'rejected' ? 'text-danger' : 'text-warning';
+                const statusText = request.status === 'approved' ? 'معتمد' : request.status === 'rejected' ? 'مرفوض' : 'قيد الانتظار';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-medium">${request.leave_type}</div>
+                        <div class="text-sm text-gray-600">${request.start_date} إلى ${request.end_date}</div>
+                    </div>
+                    <span class="text-sm font-medium ${statusColor}">${statusText}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function loadTodayAppointments() {
+            const today = new Date().toISOString().split('T')[0];
+            const appointments = await window.supabaseHelpers.getAppointments(today);
+            const myAppointments = appointments.filter(a => a.doctor_id === currentDoctor.id);
+            
+            const container = document.getElementById('today-schedule');
+            container.innerHTML = '';
+            
+            if (myAppointments.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center">لا توجد مواعيد اليوم</p>';
+                return;
+            }
+            
+            myAppointments.forEach(apt => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-medium">${apt.patient_name}</div>
+                        <div class="text-sm text-gray-600">${apt.visit_reason || 'فحص روتيني'}</div>
+                    </div>
+                    <div class="text-sm text-primary font-semibold">${apt.appointment_time?.substring(0, 5)}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function checkTodayAttendance() {
+            const today = new Date().toISOString().split('T')[0];
+            const records = await window.supabaseHelpers.getAttendance(currentDoctor.id, today);
+            
+            if (records.length > 0 && records[0].check_in) {
+                const record = records[0];
+                currentAttendanceId = record.id;
+                document.getElementById('check-in-time').textContent = new Date(record.check_in).toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'});
+                document.getElementById('attendance-status').textContent = 'حاضر';
+                document.getElementById('check-in-btn').style.display = 'none';
+                document.getElementById('check-out-btn').style.display = 'block';
+                
+                if (record.check_out) {
+                    document.getElementById('check-out-time').textContent = new Date(record.check_out).toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'});
+                    document.getElementById('check-out-btn').style.display = 'none';
+                }
             }
         }
 
-        // Attendance functions
-        function checkIn() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('ar-EG', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: true
-            });
-            
-            alert(`تم تسجيل الدخول في ${timeString}`);
-            document.getElementById('attendance-status').textContent = 'حاضر';
-            document.getElementById('attendance-status').className = 'text-2xl font-bold text-success';
-        }
-
-        function checkOut() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('ar-EG', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: true
-            });
-            
-            if (confirm('هل أنت متأكد من تسجيل الانصراف؟')) {
-                alert(`تم تسجيل الانصراف في ${timeString}`);
-                document.getElementById('attendance-status').textContent = 'منصرف';
-                document.getElementById('attendance-status').className = 'text-2xl font-bold text-warning';
+        async function checkIn() {
+            const result = await window.supabaseHelpers.checkIn(currentDoctor.id);
+            if (result) {
+                currentAttendanceId = result.id;
+                document.getElementById('check-in-time').textContent = new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'});
+                document.getElementById('attendance-status').textContent = 'حاضر';
+                document.getElementById('check-in-btn').style.display = 'none';
+                document.getElementById('check-out-btn').style.display = 'block';
+                alert('تم تسجيل الحضور بنجاح');
             }
         }
 
-        // Consultation functions
-        function viewConsultation(id) {
-            alert(`سيتم عرض تفاصيل الاستشارة ${id} قريباً`);
+        async function checkOut() {
+            if (currentAttendanceId) {
+                const result = await window.supabaseHelpers.checkOut(currentAttendanceId);
+                if (result) {
+                    document.getElementById('check-out-time').textContent = new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute: '2-digit'});
+                    document.getElementById('check-out-btn').style.display = 'none';
+                    alert('تم تسجيل الانصراف بنجاح');
+                }
+            }
         }
 
-        function replyConsultation(id) {
-            const reply = prompt('اكتب ردك على الاستشارة:');
-            if (reply) {
+        function openReplyModal(consultationId, patientName, complaint) {
+            document.getElementById('reply-consultation-id').value = consultationId;
+            document.getElementById('consultation-details').innerHTML = `
+                <div class="font-semibold mb-2">المريض: ${patientName}</div>
+                <div class="text-sm text-gray-600">الشكوى: ${complaint}</div>
+            `;
+            document.getElementById('reply-modal').classList.add('show');
+        }
+
+        function closeReplyModal() {
+            document.getElementById('reply-modal').classList.remove('show');
+            document.getElementById('reply-form').reset();
+        }
+
+        document.getElementById('reply-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const consultationId = document.getElementById('reply-consultation-id').value;
+            const response = document.getElementById('doctor-response').value;
+            
+            const result = await window.supabaseHelpers.updateConsultation(consultationId, {
+                doctor_response: response,
+                doctor_id: currentDoctor.id,
+                status: 'completed'
+            });
+            
+            if (result) {
                 alert('تم إرسال الرد بنجاح');
-                // Remove the consultation from the list
-                event.target.closest('.border').style.display = 'none';
+                closeReplyModal();
+                await loadConsultations();
+            } else {
+                alert('حدث خطأ في الإرسال');
             }
-        }
+        });
 
-        // Leave request functions
         function openLeaveRequestModal() {
             document.getElementById('leave-request-modal').classList.add('show');
         }
@@ -491,58 +481,39 @@
             document.getElementById('leave-request-form').reset();
         }
 
-        document.getElementById('leave-request-form').addEventListener('submit', function(e) {
+        document.getElementById('leave-request-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const leaveType = document.getElementById('leave-type').value;
-            const startDate = document.getElementById('leave-start').value;
-            const endDate = document.getElementById('leave-end').value;
-            const replacement = document.getElementById('replacement-doctor').value;
-            const notes = document.getElementById('leave-notes').value;
+            const leaveData = {
+                doctor_id: currentDoctor.id,
+                leave_type: document.getElementById('leave-type').value,
+                start_date: document.getElementById('leave-start').value,
+                end_date: document.getElementById('leave-end').value,
+                notes: document.getElementById('leave-notes').value
+            };
             
-            if (!leaveType || !startDate || !endDate) {
-                alert('الرجاء ملء الحقول المطلوبة');
-                return;
+            const result = await window.supabaseHelpers.addLeaveRequest(leaveData);
+            
+            if (result) {
+                alert('تم إرسال الطلب بنجاح');
+                closeLeaveRequestModal();
+                await loadLeaveRequests();
+            } else {
+                alert('حدث خطأ في الإرسال');
             }
-            
-            // Add to leave requests list
-            const leaveRequestsContainer = document.getElementById('leave-requests');
-            const newRequest = document.createElement('div');
-            newRequest.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg';
-            newRequest.innerHTML = `
-                <div>
-                    <div class="font-medium">${document.getElementById('leave-type').options[document.getElementById('leave-type').selectedIndex].text}</div>
-                    <div class="text-sm text-gray-600">من ${startDate} إلى ${endDate}</div>
-                </div>
-                <div class="flex items-center">
-                    <span class="status-indicator status-pending"></span>
-                    <span class="text-sm font-medium text-warning">قيد الانتظار</span>
-                </div>
-            `;
-            
-            leaveRequestsContainer.insertBefore(newRequest, leaveRequestsContainer.firstChild);
-            
-            alert('تم إرسال طلب الإجازة بنجاح');
-            closeLeaveRequestModal();
         });
 
-        function startRealTimeUpdates() {
-            // Simulate real-time updates
-            setInterval(() => {
-                // Update consultation count
-                const consultationsCount = Math.floor(Math.random() * 10) + 3;
-                document.querySelector('#consultations-list .border .flex .text-danger').textContent = `${consultationsCount} جديدة`;
-                
-                // Update stats
-                const patientsSeen = Math.floor(Math.random() * 20) + 10;
-                document.querySelector('.text-primary.font-semibold').textContent = patientsSeen;
-            }, 30000);
+        function logoutDoctor() {
+            localStorage.removeItem('currentDoctor');
+            location.reload();
         }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuth();
-        });
+        // Check if already logged in
+        const savedDoctor = localStorage.getItem('currentDoctor');
+        if (savedDoctor) {
+            currentDoctor = JSON.parse(savedDoctor);
+            initializeDoctorPortal();
+        }
     </script>
 </body>
 </html>
