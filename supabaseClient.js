@@ -1,4 +1,4 @@
-// supabaseClient.js - النسخة المحدثة (شاملة الميزات الجديدة)
+// supabaseClient.js - متوافق مع قاعدة البيانات النهائية
 const SUPABASE_URL = 'https://dkvefbjgsnhrkjpwprux.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrdmVmYmpnc25ocmtqcHdwcnV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTQ5MDksImV4cCI6MjA4MDYzMDkwOX0.fZxEFQc9iUtqX6XEtuuy_XfRIMp9oR3RKmJ84rUzyGw';
 
@@ -6,7 +6,7 @@ if (typeof supabase === 'undefined') {
     console.error('❌ Supabase library not loaded!');
 } else {
     window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('✅ Supabase client created');
+    console.log('✅ Supabase client ready');
 
     window.supabaseHelpers = {
         // --- AUTH ---
@@ -26,27 +26,23 @@ if (typeof supabase === 'undefined') {
             return user;
         },
 
-        // --- SPECIALTIES (توحيد التخصصات) ---
+        // --- SPECIALTIES ---
         getUniqueSpecialties: async function() {
             try {
-                // جلب التخصصات من جدول الأطباء لضمان تطابقها
                 const { data, error } = await window.supabaseClient
                     .from('doctors')
                     .select('specialty');
-                
                 if (error) throw error;
-                
-                // استخراج التخصصات الفريدة فقط
                 const unique = [...new Set(data.map(item => item.specialty))];
-                return unique.filter(s => s); // إزالة القيم الفارغة
+                return unique.filter(s => s);
             } catch (error) {
-                console.error('Error fetching specialties:', error);
-                return ['طب الأسرة', 'الباطنية', 'الأطفال', 'النساء', 'الأسنان', 'الجلدية']; // قائمة احتياطية
+                return ['طب الأسرة', 'الباطنية', 'الأطفال', 'النساء', 'الأسنان', 'الجلدية'];
             }
         },
 
         // --- CONSULTATIONS ---
         addConsultation: async function(consultationData) {
+            // جلب المستخدم الحالي لربط الاستشارة به
             const { data: { user } } = await window.supabaseClient.auth.getUser();
             if (user) consultationData.user_id = user.id;
 
@@ -54,10 +50,11 @@ if (typeof supabase === 'undefined') {
                 .from('consultations')
                 .insert([consultationData])
                 .select();
+            
+            if (error) console.error("Error adding consultation:", error);
             return error ? null : data[0];
         },
 
-        // جلب الاستشارات المفتوحة حسب التخصص (للطبيب)
         getPendingConsultationsBySpecialty: async function(specialty) {
             try {
                 const { data, error } = await window.supabaseClient
@@ -70,13 +67,12 @@ if (typeof supabase === 'undefined') {
             } catch (error) { return []; }
         },
 
-        // جلب استشارات طبيب معين (الأرشيف)
         getDoctorHistory: async function(doctorId) {
             try {
                 const { data, error } = await window.supabaseClient
                     .from('consultations')
                     .select('*')
-                    .eq('doctor_id', doctorId) // الاستشارات التي رد عليها هذا الطبيب
+                    .eq('doctor_id', doctorId)
                     .eq('status', 'completed')
                     .order('updated_at', { ascending: false });
                 return error ? [] : data;
@@ -109,7 +105,7 @@ if (typeof supabase === 'undefined') {
             return !error;
         },
 
-        // --- DOCTORS & STAFF ---
+        // --- DOCTORS ---
         getDoctors: async function() {
             const { data, error } = await window.supabaseClient
                 .from('doctors')
@@ -117,7 +113,7 @@ if (typeof supabase === 'undefined') {
             return error ? [] : data;
         },
 
-        // --- ATTENDANCE (الحضور) ---
+        // --- ATTENDANCE ---
         getAttendanceHistory: async function(doctorId) {
             try {
                 const { data, error } = await window.supabaseClient
@@ -144,22 +140,17 @@ if (typeof supabase === 'undefined') {
         },
 
         checkOut: async function(attendanceId) {
-            // حساب ساعات العمل عند الانصراف (بشكل تقريبي)
-            // في التطبيق الفعلي يفضل حسابها في الباك إند أو عند الجلب
             try {
                 const now = new Date();
                 const { error } = await window.supabaseClient
                     .from('attendance')
-                    .update({ 
-                        check_out: now.toISOString(),
-                        // total_hours يمكن حسابه لاحقاً أو هنا إذا كان لدينا وقت الدخول
-                    })
+                    .update({ check_out: now.toISOString() })
                     .eq('id', attendanceId);
                 return !error;
             } catch (error) { return false; }
         },
 
-        // --- LEAVE REQUESTS (الإجازات) ---
+        // --- LEAVES ---
         getDoctorLeaves: async function(doctorId) {
             try {
                 const { data, error } = await window.supabaseClient
@@ -179,11 +170,38 @@ if (typeof supabase === 'undefined') {
             return error ? null : data[0];
         },
 
-        // --- OTHER ---
-        getClinics: async function() { /* ... كما في الكود السابق ... */ 
+        // --- CLINICS ---
+        getClinics: async function() {
              const { data } = await window.supabaseClient.from('clinics').select('*'); return data || []; 
         },
-        // باقي الدوال (Appointments, etc.) تبقى كما هي...
+        
+        // --- APPOINTMENTS ---
+        addAppointment: async function(appointmentData) {
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            if (user) appointmentData.user_id = user.id;
+
+            const { data, error } = await window.supabaseClient
+                .from('appointments')
+                .insert([appointmentData])
+                .select();
+            return error ? null : data[0];
+        },
+        
+        getAppointments: async function(date) {
+            let query = window.supabaseClient.from('appointments').select('*, clinics(name), doctors(name)');
+            if (date) query = query.eq('appointment_date', date);
+            const { data } = await query.order('appointment_time', { ascending: true });
+            return data || [];
+        },
+        
+        getMyAppointments: async function(userId) {
+            const { data } = await window.supabaseClient
+                .from('appointments')
+                .select('*, clinics(name), doctors(name)')
+                .eq('user_id', userId)
+                .order('appointment_date', { ascending: false });
+            return data || [];
+        }
     };
     console.log('✅ Supabase Helpers Loaded!');
 }
