@@ -174,12 +174,21 @@
                             <input type="number" id="temperature" step="0.1" class="w-full p-2 border rounded">
                         </div>
                         <div>
-                            <label class="text-xs text-gray-500 block mb-1">الضغط</label>
-                            <input type="text" id="blood_pressure" placeholder="120/80" class="w-full p-2 border rounded">
-                        </div>
-                        <div>
                             <label class="text-xs text-gray-500 block mb-1">النبض</label>
                             <input type="number" id="pulse" class="w-full p-2 border rounded">
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="text-sm font-bold text-gray-700 block mb-2">ضغط الدم (انقباضي / انبساطي)</label>
+                        <div class="flex space-x-2 space-x-reverse">
+                            <div>
+                                <input type="number" id="bp_systolic" placeholder="120" class="w-full p-2 border rounded text-center" title="الضغط الانقباضي (العلوي)">
+                            </div>
+                            <span class="text-xl text-gray-400 self-center">/</span>
+                            <div>
+                                <input type="number" id="bp_diastolic" placeholder="80" class="w-full p-2 border rounded text-center" title="الضغط الانبساطي (السفلي)">
+                            </div>
                         </div>
                     </div>
 
@@ -276,9 +285,11 @@
             if(el) show ? el.classList.remove('hidden') : el.classList.add('hidden');
         }
 
-        // دالة مساعدة لتحويل القيم الفارغة إلى null
+        // دالة مساعدة لتحويل القيم الفارغة إلى null (للأرقام)
         function getValueOrNull(elementId) {
-            const val = document.getElementById(elementId).value;
+            const el = document.getElementById(elementId);
+            if (!el) return null;
+            const val = el.value;
             return val.trim() === '' ? null : val;
         }
 
@@ -295,7 +306,6 @@
                 phone: document.getElementById('phone').value,
                 email: getValueOrNull('email'),
                 gender: document.getElementById('gender').value,
-                // استخدام الدالة المساعدة للأرقام
                 family_count: getValueOrNull('family_count'),
                 specialty: document.getElementById('specialty').value,
                 complaint: document.getElementById('complaint').value,
@@ -316,19 +326,19 @@
                 pregnancy: document.getElementById('pregnancy').checked,
                 breastfeeding: document.getElementById('breastfeeding').checked,
                 
-                // استخدام الدالة المساعدة للأرقام والعلامات الحيوية
+                // Vitals - استخدام الدوال المعدلة
                 weight: getValueOrNull('weight'),
                 height: getValueOrNull('height'),
                 temperature: getValueOrNull('temperature'),
-                blood_pressure: getValueOrNull('blood_pressure'),
                 pulse: getValueOrNull('pulse'),
+                
+                // *** التعديل الجوهري هنا: تقسيم الضغط ***
+                blood_pressure_systolic: getValueOrNull('bp_systolic'),
+                blood_pressure_diastolic: getValueOrNull('bp_diastolic'),
                 
                 consultation_number: `CON${Math.floor(Math.random()*1000000)}`,
                 status: 'pending'
             };
-
-            // التحقق من الأخطاء في وحدة التحكم
-            console.log("Sending Data:", data);
 
             const res = await window.supabaseHelpers.addConsultation(data);
             
@@ -337,7 +347,7 @@
                 document.getElementById('success-modal').classList.remove('hidden');
                 document.getElementById('success-modal').classList.add('flex');
             } else {
-                alert('حدث خطأ في الإرسال. تأكد من اتصالك بالإنترنت، أو أن جميع الحقول الرقمية تحتوي على أرقام صحيحة.');
+                alert('حدث خطأ في الإرسال. تأكد من إدخال البيانات الرقمية بشكل صحيح.');
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             }
