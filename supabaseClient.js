@@ -410,7 +410,6 @@ if (typeof supabase === 'undefined') {
 
         // ==================== الإحصائيات (STATISTICS) ====================
         getStatistics: async function(date) {
-            // ... (نفس كود الإحصائيات السابق)
              try {
                 const { data: clinics } = await window.supabaseClient
                     .from('clinics')
