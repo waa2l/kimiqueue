@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة التبويض</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Cairo', sans-serif; } </style>
+</head>
+<body class="bg-gray-50 font-arabic">
+    <div class="max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow-lg">
+        <div class="flex items-center mb-6">
+            <a href="index.html" class="text-gray-500 hover:text-pink-600 ml-4"><i class="fas fa-arrow-right"></i></a>
+            <h1 class="text-2xl font-bold text-gray-800">حاسبة التبويض والخصوبة</h1>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">تاريخ أول يوم في آخر دورة</label>
+                <input type="date" id="lastPeriod" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">متوسط طول الدورة (بالأيام)</label>
+                <input type="number" id="cycleLength" value="28" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-pink-500 outline-none">
+                <p class="text-xs text-gray-500 mt-1">عادة ما تكون بين 21 و 35 يوماً</p>
+            </div>
+            <button onclick="calculateOvulation()" class="w-full bg-pink-600 text-white py-3 rounded-lg font-bold hover:bg-pink-700 transition">احسبي الآن</button>
+        </div>
+
+        <div id="result" class="hidden mt-8 space-y-4">
+            <div class="bg-pink-50 p-4 rounded-lg border border-pink-200 text-center">
+                <p class="text-pink-800 text-sm mb-1">يوم التبويض المتوقع</p>
+                <div id="ovulationDate" class="text-2xl font-bold text-pink-600"></div>
+            </div>
+            
+            <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h3 class="font-bold text-green-800 mb-2 flex items-center"><i class="fas fa-calendar-check ml-2"></i>أيام الخصوبة العالية</h3>
+                <p id="fertileWindow" class="text-gray-700"></p>
+            </div>
+
+            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
+                <p class="text-blue-800 text-sm">تاريخ الدورة القادمة المتوقع</p>
+                <div id="nextPeriod" class="text-lg font-bold text-blue-600"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculateOvulation() {
+            const lastPeriod = new Date(document.getElementById('lastPeriod').value);
+            const cycleLength = parseInt(document.getElementById('cycleLength').value);
+
+            if (isNaN(lastPeriod.getTime()) || !cycleLength) {
+                alert('الرجاء إدخال التاريخ وطول الدورة');
+                return;
+            }
+
+            // Logic: Ovulation is approx 14 days BEFORE the next period starts
+            // 1. Find next period
+            const nextPeriodDate = new Date(lastPeriod);
+            nextPeriodDate.setDate(lastPeriod.getDate() + cycleLength);
+
+            // 2. Find Ovulation (Next Period - 14 days)
+            const ovulationDate = new Date(nextPeriodDate);
+            ovulationDate.setDate(nextPeriodDate.getDate() - 14);
+
+            // 3. Find Fertile Window (Ovulation - 4 days to Ovulation + 1 day)
+            const fertileStart = new Date(ovulationDate);
+            fertileStart.setDate(ovulationDate.getDate() - 4);
+            
+            const fertileEnd = new Date(ovulationDate);
+            fertileEnd.setDate(ovulationDate.getDate() + 1);
+
+            // Formatting
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            
+            document.getElementById('ovulationDate').textContent = ovulationDate.toLocaleDateString('ar-EG', options);
+            document.getElementById('nextPeriod').textContent = nextPeriodDate.toLocaleDateString('ar-EG', options);
+            
+            document.getElementById('fertileWindow').innerHTML = `
+                من: <span class="font-bold">${fertileStart.toLocaleDateString('ar-EG')}</span><br>
+                إلى: <span class="font-bold">${fertileEnd.toLocaleDateString('ar-EG')}</span>
+            `;
+
+            document.getElementById('result').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
