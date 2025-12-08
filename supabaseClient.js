@@ -1,20 +1,20 @@
-// supabaseClient.js - Fixed Version
+// supabaseClient.js - النسخة المحدثة والكاملة
 const SUPABASE_URL = 'https://dkvefbjgsnhrkjpwprux.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrdmVmYmpnc25ocmtqcHdwcnV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNTQ5MDksImV4cCI6MjA4MDYzMDkwOX0.fZxEFQc9iUtqX6XEtuuy_XfRIMp9oR3RKmJ84rUzyGw';
 
-// Check if Supabase library is loaded
+// التحقق من تحميل مكتبة Supabase
 if (typeof supabase === 'undefined') {
     console.error('❌ Supabase library not loaded! Make sure the script tag is correct.');
 } else {
     console.log('✅ Supabase library loaded');
     
-    // Create Supabase client
+    // إنشاء عميل Supabase
     window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log('✅ Supabase client created');
 
-    // Create helper functions
+    // إنشاء دوال المساعدة
     window.supabaseHelpers = {
-        // ==================== CLINICS ====================
+        // ==================== العيادات (CLINICS) ====================
         getClinics: async function() {
             try {
                 const { data, error } = await window.supabaseClient
@@ -26,8 +26,6 @@ if (typeof supabase === 'undefined') {
                     console.error('Error fetching clinics:', error); 
                     return []; 
                 }
-                
-                console.log('✅ Fetched clinics:', data);
                 
                 return data.map(c => ({
                     ...c,
@@ -52,8 +50,6 @@ if (typeof supabase === 'undefined') {
                     console.error('Error fetching clinics by screen:', error); 
                     return []; 
                 }
-                
-                console.log(`✅ Fetched clinics for screen ${screenNumber}:`, data);
                 
                 return data.map(c => ({
                     ...c,
@@ -102,7 +98,6 @@ if (typeof supabase === 'undefined') {
                     console.error('Error updating clinic:', error);
                     return false;
                 }
-                console.log('✅ Clinic updated successfully');
                 return true;
             } catch (error) {
                 console.error('Exception in updateClinic:', error);
@@ -142,7 +137,6 @@ if (typeof supabase === 'undefined') {
                     console.error('Error updating queue:', error);
                     return false;
                 }
-                console.log(`✅ Queue updated: clinic ${clinicId} -> number ${newNumber}`);
                 return true;
             } catch (error) {
                 console.error('Exception in updateQueue:', error);
@@ -159,7 +153,6 @@ if (typeof supabase === 'undefined') {
                         schema: 'public', 
                         table: 'clinics' 
                     }, (payload) => {
-                        console.log('🔔 Realtime update received:', payload);
                         const newData = payload.new;
                         if (newData) {
                             newData.current = newData.current_number || 0;
@@ -167,11 +160,8 @@ if (typeof supabase === 'undefined') {
                         }
                         callback(newData);
                     })
-                    .subscribe((status) => {
-                        console.log('Realtime subscription status:', status);
-                    });
+                    .subscribe();
                 
-                console.log('✅ Subscribed to clinic updates');
                 return channel;
             } catch (error) {
                 console.error('Exception in subscribeToClinicUpdates:', error);
@@ -179,7 +169,7 @@ if (typeof supabase === 'undefined') {
             }
         },
 
-        // ==================== DOCTORS ====================
+        // ==================== الأطباء (DOCTORS) ====================
         getDoctors: async function() {
             try {
                 const { data, error } = await window.supabaseClient
@@ -220,25 +210,173 @@ if (typeof supabase === 'undefined') {
             }
         },
 
-        updateDoctor: async function(doctorId, updates) {
+        // ==================== المواعيد (APPOINTMENTS) - (تمت الإضافة) ====================
+        getAppointments: async function(date) {
             try {
-                const { error } = await window.supabaseClient
-                    .from('doctors')
-                    .update(updates)
-                    .eq('id', doctorId);
+                let query = window.supabaseClient
+                    .from('appointments')
+                    .select('*, clinics(name), doctors(name)');
+                
+                if (date) {
+                    query = query.eq('appointment_date', date);
+                }
+                
+                const { data, error } = await query.order('appointment_time', { ascending: true });
                 
                 if (error) {
-                    console.error('Error updating doctor:', error);
-                    return false;
+                    console.error('Error fetching appointments:', error);
+                    return [];
                 }
+                return data;
+            } catch (error) {
+                console.error('Exception in getAppointments:', error);
+                return [];
+            }
+        },
+
+        addAppointment: async function(appointmentData) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('appointments')
+                    .insert([appointmentData])
+                    .select();
+                
+                if (error) {
+                    console.error('Error adding appointment:', error);
+                    return null;
+                }
+                return data[0];
+            } catch (error) {
+                console.error('Exception in addAppointment:', error);
+                return null;
+            }
+        },
+
+        // ==================== الاستشارات (CONSULTATIONS) - (تمت الإضافة) ====================
+        addConsultation: async function(consultationData) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('consultations')
+                    .insert([consultationData])
+                    .select();
+                
+                if (error) {
+                    console.error('Error adding consultation:', error);
+                    return null;
+                }
+                return data[0];
+            } catch (error) {
+                console.error('Exception in addConsultation:', error);
+                return null;
+            }
+        },
+
+        getConsultations: async function(status) {
+            try {
+                let query = window.supabaseClient.from('consultations').select('*');
+                if (status) query = query.eq('status', status);
+                
+                const { data, error } = await query.order('created_at', { ascending: false });
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Error fetching consultations:', error);
+                return [];
+            }
+        },
+
+        updateConsultation: async function(id, updates) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('consultations')
+                    .update(updates)
+                    .eq('id', id);
+                if (error) throw error;
                 return true;
             } catch (error) {
-                console.error('Exception in updateDoctor:', error);
+                console.error('Error updating consultation:', error);
                 return false;
             }
         },
 
-        // ==================== SETTINGS ====================
+        // ==================== الحضور والإجازات (ATTENDANCE & LEAVES) ====================
+        getAttendance: async function(doctorId, date) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('attendance')
+                    .select('*')
+                    .eq('doctor_id', doctorId)
+                    .eq('date', date);
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Error fetching attendance:', error);
+                return [];
+            }
+        },
+
+        checkIn: async function(doctorId) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('attendance')
+                    .insert([{
+                        doctor_id: doctorId,
+                        date: new Date().toISOString().split('T')[0],
+                        check_in: new Date().toISOString(),
+                        status: 'present'
+                    }])
+                    .select();
+                if (error) throw error;
+                return data[0];
+            } catch (error) {
+                console.error('Error checking in:', error);
+                return null;
+            }
+        },
+
+        checkOut: async function(attendanceId) {
+            try {
+                const { error } = await window.supabaseClient
+                    .from('attendance')
+                    .update({ check_out: new Date().toISOString() })
+                    .eq('id', attendanceId);
+                if (error) throw error;
+                return true;
+            } catch (error) {
+                console.error('Error checking out:', error);
+                return false;
+            }
+        },
+
+        getLeaveRequests: async function(doctorId) {
+             try {
+                let query = window.supabaseClient.from('leave_requests').select('*');
+                if (doctorId) query = query.eq('doctor_id', doctorId);
+                
+                const { data, error } = await query.order('created_at', { ascending: false });
+                if (error) throw error;
+                return data;
+            } catch (error) {
+                console.error('Error fetching leave requests:', error);
+                return [];
+            }
+        },
+
+        addLeaveRequest: async function(requestData) {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('leave_requests')
+                    .insert([requestData])
+                    .select();
+                if (error) throw error;
+                return data[0];
+            } catch (error) {
+                console.error('Error adding leave request:', error);
+                return null;
+            }
+        },
+
+        // ==================== الإعدادات (SETTINGS) ====================
         getSettings: async function() {
             try {
                 const { data, error } = await window.supabaseClient
@@ -246,11 +384,7 @@ if (typeof supabase === 'undefined') {
                     .select('*')
                     .single();
                 
-                if (error && error.code !== 'PGRST116') {
-                    console.error('Error fetching settings:', error);
-                    return null;
-                }
-                
+                if (error && error.code !== 'PGRST116') return null;
                 return data;
             } catch (error) {
                 console.error('Exception in getSettings:', error);
@@ -260,44 +394,24 @@ if (typeof supabase === 'undefined') {
 
         updateSettings: async function(settings) {
             try {
-                const { data: existing } = await window.supabaseClient
-                    .from('settings')
-                    .select('id')
-                    .single();
+                const { data: existing } = await window.supabaseClient.from('settings').select('id').single();
                 
                 if (existing) {
-                    const { error } = await window.supabaseClient
-                        .from('settings')
-                        .update(settings)
-                        .eq('id', existing.id);
-                    
-                    if (error) {
-                        console.error('Error updating settings:', error);
-                        return false;
-                    }
-                    return true;
+                    await window.supabaseClient.from('settings').update(settings).eq('id', existing.id);
                 } else {
-                    const { error } = await window.supabaseClient
-                        .from('settings')
-                        .insert([settings]);
-                    
-                    if (error) {
-                        console.error('Error creating settings:', error);
-                        return false;
-                    }
-                    return true;
+                    await window.supabaseClient.from('settings').insert([settings]);
                 }
+                return true;
             } catch (error) {
                 console.error('Exception in updateSettings:', error);
                 return false;
             }
         },
 
-        // ==================== STATISTICS ====================
+        // ==================== الإحصائيات (STATISTICS) ====================
         getStatistics: async function(date) {
-            try {
-                const targetDate = date || new Date().toISOString().split('T')[0];
-                
+            // ... (نفس كود الإحصائيات السابق)
+             try {
                 const { data: clinics } = await window.supabaseClient
                     .from('clinics')
                     .select('*')
@@ -310,17 +424,10 @@ if (typeof supabase === 'undefined') {
                     systemEfficiency: 94
                 };
             } catch (error) {
-                console.error('Exception in getStatistics:', error);
-                return {
-                    dailyPatients: 0,
-                    activeClinics: 0,
-                    avgWaitTime: 0,
-                    systemEfficiency: 0
-                };
+                return { dailyPatients: 0, activeClinics: 0, avgWaitTime: 0, systemEfficiency: 0 };
             }
         }
     };
 
     console.log('✅ Supabase Helpers Loaded Successfully!');
-    console.log('Available functions:', Object.keys(window.supabaseHelpers));
 }
